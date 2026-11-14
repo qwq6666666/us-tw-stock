@@ -8,6 +8,7 @@ from datetime import datetime, timezone, timedelta
 import core
 import fundamentals
 import model
+import scorecard
 
 
 def main():
@@ -46,6 +47,8 @@ def main():
     try:                                          # 漲跌機率模型：失敗時保留前一次的檔案
         mres = model.build_all(market)
         model.save(mres)
+        added = scorecard.append_predictions(mres)          # 只新增、不修改；同一天重跑不會重複記
+        status.append(f'模型成績單：新增 {added} 筆判斷紀錄')
         status += ['漲跌機率模型：' + x for x in mres['status']]
     except Exception as e:
         status.append(f'漲跌機率模型：失敗（{type(e).__name__}: {str(e)[:80]}）')

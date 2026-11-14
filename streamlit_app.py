@@ -13,6 +13,7 @@ from plotly.subplots import make_subplots
 import core
 import fundamentals
 import model as probmodel
+import scorecard
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide')
 
@@ -91,8 +92,8 @@ SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.
 FUND = fundamentals.load()
 PROB = probmodel.load()
 
-tab_sum, tab_stock, tab_fund, tab_prob, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
-    ['今日摘要', '個股查詢', '公司體質', '漲跌機率', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
+tab_sum, tab_stock, tab_fund, tab_prob, tab_score, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
+    ['今日摘要', '個股查詢', '公司體質', '漲跌機率', '模型成績單', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
 
 with tab_sum:
     st.markdown(SUMMARY, unsafe_allow_html=True)
@@ -267,6 +268,80 @@ with tab_prob:
                 '- 樣本只有約 5 年，且相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
                 '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，這是後續改進的方向。',
                 '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度，皆未勝過基準；沒有再針對驗證期反覆調參。']))
+
+with tab_score:
+    LOGDF = scorecard.evaluate(M.close_all)
+    ok, n_log, bad = scorecard.verify_log()
+    if LOGDF.empty:
+        st.info('成績單還沒有紀錄。每日更新跑過一次之後，就會開始記錄每天的判斷。')
+    else:
+        SC = scorecard.summarize(LOGDF)
+        st.caption(f"紀錄從 {LOGDF['made_at'].min():%Y-%m-%d} 開始，之後每個交易日自動新增；不回填歷史（回填就是事後諸葛）。"
+                   '到期後用真實收盤價對答案。')
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric('累計判斷', f"{SC['total']} 筆")
+        c2.metric('已到期對答案', f"{SC['resolved']} 筆")
+        c3.metric('還沒到期', f"{SC['pending']} 筆")
+        c4.metric('紀錄完整性', '✅ 完整' if ok else '⚠️ 異常', f'{n_log} 筆已驗證' if ok else f'第 {bad} 列起不一致', delta_color='off')
+        if not ok:
+            st.error(f'紀錄檔的防竄改雜湊鏈在第 {bad} 列起不一致，代表檔案被改動過或損毀，下列成績不可信。')
+        if SC['resolved'] < 30:
+            st.warning(f"目前只有 {SC['resolved']} 筆到期，樣本太少，命中率的起伏大多是運氣，請不要據此下結論。"
+                       '1 週期的判斷最快一週後到期；建議累積至少數百筆再看。')
+
+        st.subheader('命中率：模型 vs「永遠猜漲」')
+        st.caption(f'命中 = 模型說漲機率 ≥ 50% 且真的漲，或說 < 50% 且真的沒漲。「近期」只看判斷日在最近 {scorecard.RECENT_DAYS} 天內的紀錄。'
+                   'Brier 是機率誤差，越低越好，要低於「基準」（只猜歷史上漲比例）才算有用。')
+
+        def fmt_stats(st_):
+            if not st_['n']:
+                return ['0', '—', '—', '—', '—']
+            return [str(st_['n']), f"{st_['hit']:.1%}", f"{st_['always_up']:.1%}", f"{st_['brier']:.4f}", f"{st_['brier_base']:.4f}"]
+
+        rows = []
+        for r in SC['rows']:
+            for scope, key in (('累計', 'all'), ('近期', 'recent')):
+                rows.append(dict(zip(['範圍', '期間', '已到期筆數', '模型命中率', '永遠猜漲命中率', 'Brier（模型）', 'Brier（基準）'],
+                                     [scope, r['label']] + fmt_stats(r[key]))))
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+
+        res = LOGDF[LOGDF['resolved']].sort_values('resolved_at')
+        if len(res) >= 5:
+            g = res.groupby('resolved_at').agg(hit=('hit', 'sum'), up=('outcome', 'sum'), n=('hit', 'count')).cumsum()
+            line = pd.DataFrame({'模型累計命中率': g['hit'] / g['n'], '永遠猜漲累計命中率': g['up'] / g['n']})
+            fig = px.line(line, height=340, title='累計命中率（依到期日）')
+            fig.update_layout(yaxis_tickformat='.0%', hovermode='x unified', legend_title='', margin=dict(l=10, r=10))
+            show(fig)
+
+        st.subheader('機率校準')
+        st.caption('模型說「約 X% 會漲」的那些判斷，實際漲的比例有沒有接近 X%。兩欄越接近，機率越可信。')
+        if SC['calibration']:
+            st.dataframe(pd.DataFrame([{'模型給的機率區間': c['range'], '筆數': c['n'], '平均預測機率': f"{c['pred']:.0%}",
+                                        '實際上漲比例': f"{c['actual']:.0%}"} for c in SC['calibration']]),
+                         hide_index=True, width='stretch')
+        else:
+            st.caption('還沒有到期的紀錄。')
+
+        st.subheader('最近對過的答案')
+        if len(res):
+            recent = res.sort_values('resolved_at', ascending=False).head(40)
+            st.dataframe(pd.DataFrame({
+                '判斷日': recent['made_at'].dt.strftime('%Y-%m-%d'), '標的': [core.label(t) for t in recent['ticker']],
+                '期間(交易日)': recent['horizon'], '當時預測上漲機率': recent['prob'].map('{:.0%}'.format),
+                '到期日': recent['resolved_at'].dt.strftime('%Y-%m-%d'), '實際報酬': recent['ret'].map('{:+.1%}'.format),
+                '結果': ['✅ 猜對' if h == 1 else '❌ 猜錯' for h in recent['hit']]}), hide_index=True, width='stretch')
+        else:
+            st.caption('還沒有到期的紀錄。')
+
+        with st.expander('這份成績單怎麼做的？可信在哪、限制在哪？'):
+            st.markdown(chr(10).join([
+                '- 每次每日更新，把當天對每檔標的、1／2／4 週的上漲機率寫進 `data/predictions_log.csv`。檔案只在檔尾新增，'
+                '每列帶 SHA-256 雜湊鏈，改動或刪除任何一列都會被上面的「紀錄完整性」抓到；GitHub 的 commit 歷史也能回頭查證。',
+                '- 同一個（判斷日, 標的, 期間）只記第一次，重跑不會覆蓋。',
+                '- 對答案不另外存檔：用到期日的收盤價直接算，結果由紀錄和價格決定。價格是還原權息後的收盤價，除權息時歷史價格可能有極小調整。',
+                '- 模型每次更新都用「截至當天所有已知結果」重新訓練（沒有偷看未來），所以這份成績單反映的是真實上線後的表現。',
+                '- 同一天不同標的的結果高度相關、相鄰日期的結果也重疊，實際獨立的樣本比筆數少，結論要更保守。',
+                '- 歷史回測（時間切分驗證）請看「漲跌機率」分頁；這裡是上線後的真實成績，兩者可以互相對照。']))
 
 with tab_news:
     st.caption(f"累積 {len(NEWS)} 則　｜　" + '　｜　'.join(META.get('news_status', [])))
