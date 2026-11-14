@@ -18,6 +18,7 @@ from plotly.subplots import make_subplots
 import core
 import fundamentals
 import model as probmodel
+import outlook
 import scorecard
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide', initial_sidebar_state='collapsed')
@@ -211,12 +212,11 @@ with tab_home:
         s = series(t)
         if len(s) < 3:
             continue
-        pr = prob_of(t, '5')
         rows.append({
             '標的': core.label(t), '市場': '美股' if M.is_us(t) else '台股', '收盤': float(s.iloc[-1]),
             '日漲跌': float(s.iloc[-1] / s.iloc[-2] - 1) * 100, '近 60 日': s.tail(60).tolist(),
             '趨勢': TREND_SHORT.get(core.trend_word(s), '—'), 'RSI': float(core.rsi(s).iloc[-1]),
-            '體質分': fund_total(t), '1 週上漲機率*': None if pr is None else pr['prob'] * 100})
+            '體質分': fund_total(t)})
     tbl = pd.DataFrame(rows)
 
     def _color(v):
@@ -229,9 +229,8 @@ with tab_home:
         '近 60 日': st.column_config.LineChartColumn(width='small'),
         'RSI': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='高於 70 偏熱、低於 30 偏冷'),
         '體質分': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='公司體質綜合分數（個股分頁有細項）'),
-        '1 週上漲機率*': st.column_config.NumberColumn(format='%.0f%%', help='模型機率，歷史驗證沒勝過基準，僅供參考'),
     })
-    st.caption('*模型在歷史驗證中沒有勝過「永遠猜漲」基準，機率只是貼近歷史上漲比例的參考，不要當進出依據（詳見「🧪 模型」）。')
+    st.caption('漲跌機率模型在歷史驗證中沒有勝過基準，所以不放在總覽；想看請到「🔎 個股 → 漲跌機率」，並先讀「🧪 模型」的說明。')
 
     left, right = st.columns([3, 2])
     with left:
@@ -462,11 +461,12 @@ with tab_news:
 
 # ═════════════════════════ 模型 ═════════════════════════
 with tab_model:
-    t_score, t_valid = st.tabs(['成績單（上線後的真實成績）', '歷史驗證（回測）'])
+    t_score, t_valid, t_sim = st.tabs(['成績單（上線後的真實成績）', '歷史驗證（回測）', '新聞前景模擬'])
 
     with t_score:
         LOGDF = scorecard.evaluate(M.close_all)
         ok, n_log, bad = scorecard.verify_log()
+        ok_r, n_res, bad_r = scorecard.verify_results()
         if LOGDF.empty:
             st.info('成績單還沒有紀錄。每日更新跑過一次之後，就會開始記錄每天的判斷。')
         else:
@@ -476,7 +476,11 @@ with tab_model:
             c1.metric('累計判斷', f"{SC['total']} 筆")
             c2.metric('已到期對答案', f"{SC['resolved']} 筆")
             c3.metric('還沒到期', f"{SC['pending']} 筆")
-            c4.metric('紀錄完整性', '✅ 完整' if ok else '⚠️ 異常', f'{n_log} 筆已驗證' if ok else f'第 {bad} 列起不一致', delta_color='off')
+            c4.metric('紀錄完整性', '✅ 完整' if ok and ok_r else '⚠️ 異常', f'判斷 {n_log}・結果 {n_res} 筆已驗證' if ok and ok_r else '請看下方訊息', delta_color='off')
+            if not ok_r:
+                st.error(f'結果紀錄的防竄改雜湊鏈在第 {bad_r} 列起不一致，到期結果可能被改動或損毀。')
+            if LOGDF.attrs.get('revised'):
+                st.warning(f"有 {LOGDF.attrs['revised']} 筆用目前價格重算的答案，和當時記下的不同（資料源事後修正過價格）。成績一律採用當時記下的結果。")
             if not ok:
                 st.error(f'紀錄檔的防竄改雜湊鏈在第 {bad} 列起不一致，代表檔案被改動過或損毀，下列成績不可信。')
             if SC['resolved'] < 30:
@@ -558,6 +562,19 @@ with tab_model:
                                   'Brier（模型）': f"{r['brier']:.4f}", 'Brier（基準）': f"{r['brier_base']:.4f}",
                                   '結論': '勝過基準' if r['beats_baseline'] else '沒勝過基準'})
             st.dataframe(pd.DataFrame(vrows), hide_index=True, width='stretch')
+            ab = PROB.get('inst_ab')
+            if ab:
+                st.markdown('##### 台股加入「法人買賣超」有沒有幫助？（A/B 驗證）')
+                st.caption(f"用 {ab['days']} 個交易日的外資、投信與全市場三大法人買賣超。規則事先訂好：同一套驗證期與參數，三個預測期間的平均 AUC 較高才採用。"
+                           + ('結果：**採用**。' if ab['used'] else '結果：**不採用**。'))
+                st.dataframe(pd.DataFrame([{'期間': PROB['horizons'][h], 'AUC（不含法人）': f"{x['without']['auc']:.3f}",
+                                            'AUC（含法人）': f"{x['with']['auc']:.3f}",
+                                            'Brier（不含）': f"{x['without']['brier']:.4f}", 'Brier（含）': f"{x['with']['brier']:.4f}",
+                                            'Brier（基準）': f"{x['with']['brier_base']:.4f}"} for h, x in ab['detail'].items()]
+                                           + [{'期間': '平均', 'AUC（不含法人）': f"{ab['auc_without']:.3f}", 'AUC（含法人）': f"{ab['auc_with']:.3f}",
+                                               'Brier（不含）': '', 'Brier（含）': '', 'Brier（基準）': ''}]),
+                             hide_index=True, width='stretch')
+                st.caption('法人特徵讓 AUC 略升，但仍低於 0.5、Brier 仍不優於基準，所以整體結論不變：模型沒有勝過基準。')
             with st.expander('怎麼讀這張表？為什麼可能沒勝過基準？'):
                 st.markdown(chr(10).join([
                     '- 這幾年股市大多在漲，所以「永遠猜漲」本身就有 56%～65% 的命中率，是很難超越的基準。',
@@ -565,3 +582,69 @@ with tab_model:
                     '- 樣本只有約 5 年，相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
                     '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，是後續改進方向。',
                     '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度皆未勝過基準；沒有再針對驗證期反覆調參。']))
+
+    with t_sim:
+        OUT = outlook.load()
+        if not OUT or not OUT.get('summary'):
+            st.info('尚無新聞前景模擬結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            S = OUT['summary']
+            if S['beats_baseline']:
+                st.success('在事先訂好的三項判準下，新聞模型勝過基準。但請先看下方的限制說明，再決定要不要參考。')
+            else:
+                st.warning('**請先看這裡：** 用歷史新聞做「不偷看未來」的模擬，這個新聞模型**沒有勝過**基準。'
+                           '意思是：用這種簡單的文字分類方法、這份新聞量，還抓不到新聞和之後漲跌之間可靠的規律。')
+            st.caption(f"更新：{OUT['updated_at']}　｜　新聞 {OUT['n_news']:,} 則（自 {OUT['news_from']}）　｜　"
+                       f"預測目標：判斷日收盤後 {OUT['horizon']} 個交易日的漲跌")
+            with st.container(border=True):
+                st.markdown('**模擬怎麼做的（每一條都是為了不偷看未來）**')
+                st.markdown(chr(10).join([
+                    '1. 每個判斷日，只用「當天收盤前已發布」的新聞（台股 13:30、美股 16:00 紐約時間；收盤後的新聞算下一個交易日）。',
+                    f"2. 按月滾動：預測某個月時，只用更早、且隔開 {OUT['horizon']} 日答案期間的資料訓練；預測完才公布答案。",
+                    '3. 每個月重新訓練一次，一路模擬到最近，所以下面的結果等於「如果過去每天都用這個模型，會怎樣」。',
+                    '4. 判準在看結果前就訂好：AUC 大於 0.53、機率誤差（Brier）優於基準、且排列檢定 p 值小於 0.05，三項都要達到。']))
+
+            c = st.columns(4)
+            c[0].metric('模擬樣本', f"{S['n']:,} 筆", f"{S['from']} ～ {S['to']}", delta_color='off')
+            c[1].metric('AUC（0.5＝亂猜）', f"{S['auc']:.3f}", f"排列檢定 p = {S['perm_p']:.2f}", delta_color='off')
+            c[2].metric('命中率', f"{S['acc']:.1%}", f"永遠猜漲 {S['acc_always_up']:.1%}", delta_color='off')
+            c[3].metric('Brier（越低越好）', f"{S['brier']:.4f}", f"基準 {S['brier_base']:.4f}", delta_color='off')
+            st.caption('排列檢定 p 值：把答案隨機打亂 300 次，看純靠運氣能得到這麼高 AUC 的機率；越小越不像運氣，一般要小於 0.05。')
+
+            st.markdown('##### 模型「最看好」與「最不看好」的各 20%，之後實際報酬')
+            sp = pd.DataFrame({'分組': ['最看好 20%', '全部', '最不看好 20%'],
+                               '之後平均報酬': [f"{S['top_ret']:+.2%}", f"{S['all_ret']:+.2%}", f"{S['bottom_ret']:+.2%}"],
+                               '之後上漲比例': [f"{S['top_up']:.0%}", '—', f"{S['bottom_up']:.0%}"]})
+            st.dataframe(sp, hide_index=True, width='stretch')
+            st.caption('如果模型有用，「最看好」應該明顯高於「最不看好」。這裡的方向若相反或差不多，就代表沒有可用的訊號。')
+
+            fo = pd.DataFrame([f for f in S['folds'] if f['auc'] is not None])
+            if len(fo):
+                fig = px.bar(fo, x='month', y='auc', height=300, title='各月 AUC（0.5 為亂猜線）', labels={'month': '月份', 'auc': 'AUC'})
+                fig.add_hline(y=0.5, line_dash='dash', line_color='gray')
+                fig.update_yaxes(range=[0.35, 0.65])
+                fig.update_layout(margin=dict(l=10, r=10))
+                show(fig)
+
+            st.markdown('##### 最近的逐筆重播：當天看到的新聞 → 模型的判斷 → 之後公布的答案')
+            rp = pd.DataFrame(OUT['replay'])
+            if len(rp):
+                rp['hit'] = [(p >= 0.5) == u for p, u in zip(rp['prob'], rp['up'])]
+                st.dataframe(pd.DataFrame({
+                    '判斷日': rp['date'], '標的': [core.label(t) for t in rp['ticker']], '當天的新聞': rp['title'],
+                    '模型說上漲機率': rp['prob'].map('{:.0%}'.format), f"{OUT['horizon']} 日後實際報酬": rp['ret'].map('{:+.1%}'.format),
+                    '結果': ['✅ 猜對' if h else '❌ 猜錯' for h in rp['hit']]}), hide_index=True, width='stretch', height=420)
+
+            cur = OUT.get('current') or {}
+            if cur:
+                with st.expander('目前各檔的「新聞前景分」（僅供參考）'):
+                    st.caption('用最近 7 天的新聞算出的平均上漲機率，與歷史上平均上漲比例比較。既然模擬沒有勝過基準，這個分數不要當進出依據。')
+                    st.dataframe(pd.DataFrame([{'標的': core.label(t), '新聞前景分': f"{v['score']:.0%}", '歷史平均': f"{v['base']:.0%}",
+                                                '近期新聞則數': v['n_news'], '最新一則': v['latest']} for t, v in cur.items()]),
+                                 hide_index=True, width='stretch')
+            with st.expander('這個模型是什麼？限制在哪？下一步呢？'):
+                st.markdown(chr(10).join([
+                    '- 模型：把新聞標題加摘要切成 2～3 個字的片段，用 TF-IDF（詞彙重要性權重）加邏輯迴歸，學「哪些詞出現時之後比較容易漲」。沒有預訓練語言模型，不懂語意。',
+                    '- 新聞來源目前只有鉅亨網，且只收與關注清單相關的新聞；同一天同一檔標的的多則新聞會合併成一筆。',
+                    '- 沒勝過基準不代表新聞完全沒有資訊，只代表這個簡單方法抓不到。下一步是用同一套模擬，在 Colab 換成 BERT 類模型或加 LoRA 微調，看是否更好。',
+                    '- 不論用什麼模型，都要通過同樣的模擬與判準，才算有用。']))
