@@ -1,0 +1,53 @@
+"""每日更新：下載行情、蒐集新聞、產生今日摘要，全部存進 data/ 資料夾。"""
+import json
+import os
+import sys
+import time
+from datetime import datetime, timezone, timedelta
+
+import core
+
+
+def main():
+    os.makedirs(core.DATA_DIR, exist_ok=True)
+    tickers = core.US_COLS + core.TW_COLS + [core.FX_TICKER]
+
+    close = None
+    for attempt in range(3):                      # Yahoo 偶爾會暫時限流，失敗就稍等再試
+        try:
+            close = core.download_close(tickers)
+            if core.FX_TICKER in close.columns and len(close) > 300:
+                break
+        except Exception as e:
+            print(f'第 {attempt + 1} 次下載失敗：{e}')
+        close = None
+        time.sleep(20 * (attempt + 1))
+    if close is None:
+        print('行情下載失敗，保留前一次的資料。')
+        sys.exit(1)
+
+    missing = [t for t in tickers if t not in close.columns]
+    close.to_csv(core.PRICES_CSV, encoding='utf-8-sig')
+    market = core.Market(close)
+
+    news, status = core.fetch_all_news()
+    archive = core.update_archive(news)
+
+    with open(core.SUMMARY_MD, 'w', encoding='utf-8') as f:
+        f.write(core.build_summary(market))
+
+    now = datetime.now(timezone(timedelta(hours=8)))
+    meta = {'updated_at': now.strftime('%Y-%m-%d %H:%M'), 'missing_tickers': missing,
+            'news_status': status, 'news_new': len(news), 'news_total': len(archive)}
+    with open(core.META_JSON, 'w', encoding='utf-8') as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    print(f"更新完成 {meta['updated_at']}（台北時間）")
+    if missing:
+        print('沒有抓到資料的代號：', missing)
+    print('\n'.join(status))
+    print(f'新聞本次 {len(news)} 則，累積 {len(archive)} 則')
+
+
+if __name__ == '__main__':
+    main()
