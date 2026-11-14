@@ -9,7 +9,7 @@
 - `model.py`：漲跌機率模型（LightGBM，台股、美股各一個；預測 5／10／20 個交易日後上漲機率；walk-forward 時間切分驗證並與基準比較；SHAP 式影響因素）→ `data/model.json`。
 - `scorecard.py`：模型成績單。每天把判斷追加到 `data/predictions_log.csv`（只新增、SHA-256 雜湊鏈防竄改，同（判斷日,標的,期間）只記第一次）；到期用 `prices.csv` 的收盤價對答案，算累計／近期命中率、Brier、機率校準。`MODEL_VER` 在模型設定有實質改動時要換。
 - `update.py`：每日更新。下載行情 → `data/prices.csv`；新聞累積 → `data/news_archive.csv`；摘要 → `data/summary.md`；狀態 → `data/meta.json`。
-- `streamlit_app.py`：網頁介面，只讀 `data/`；「個股查詢」遇到清單外的代號才即時向 Yahoo Finance 查詢。
+- `streamlit_app.py`：網頁介面，只讀 `data/`。五個主分頁：總覽（關鍵數字卡片、關注清單表、體質×趨勢四格表、今日摘要）／個股（共用選單，走勢、體質、機率、相關新聞；輸入清單外代號才即時向 Yahoo Finance 查詢）／市場／新聞／模型（成績單、歷史驗證）。顏色採台股慣例紅漲綠跌；佈景在 `.streamlit/config.toml`。新增功能時放進既有分頁，不要再增加頂層分頁。
 - `.github/workflows/daily.yml`：台北時間週一至週五 07:30 執行 `update.py` 並把 `data/` 存回 `main`。
 - 網頁：https://us-tw-stock.streamlit.app （Streamlit Community Cloud，`main` 有新 commit 就自動同步）。
 

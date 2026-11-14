@@ -1,7 +1,12 @@
-"""美股 × 台股整合分析：網頁介面（Streamlit）。資料來自 data/ 資料夾，由每日排程更新。"""
+"""美股 × 台股整合分析：網頁介面（Streamlit）。資料來自 data/ 資料夾，由每日排程更新。
+
+版面：總覽（儀表板）／個股（選一檔，走勢、體質、機率、新聞一次看）／市場（績效、連動、ADR）／新聞／模型（成績單與驗證）。
+顏色採台股慣例：紅漲、綠跌。
+"""
 import json
 import os
 import re
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -15,7 +20,29 @@ import fundamentals
 import model as probmodel
 import scorecard
 
-st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide')
+st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide', initial_sidebar_state='collapsed')
+
+UP, DOWN, FLAT = '#e5484d', '#2f9e6b', '#8a8f98'      # 台股慣例：紅漲、綠跌
+
+st.markdown('''
+<style>
+.block-container {max-width: 1200px; padding-top: 2.2rem;}
+h1 {font-size: 1.9rem !important; margin-bottom: 0 !important;}
+.kgrid {display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 8px;}
+.kpi {border: 1px solid rgba(128,128,128,.25); border-radius: 14px; padding: 12px 16px; background: rgba(128,128,128,.07);}
+.kpi .t {font-size: .82rem; opacity: .7;}
+.kpi .v {font-size: 1.65rem; font-weight: 700; line-height: 1.35;}
+.kpi .c {font-size: .95rem; font-weight: 600;}
+.kpi .s {font-size: .78rem; opacity: .65;}
+.pill {display: inline-block; padding: 2px 11px; border-radius: 999px; font-size: .82rem; margin: 2px 6px 2px 0;
+       border: 1px solid rgba(128,128,128,.3); background: rgba(128,128,128,.10);}
+.hero {border: 1px solid rgba(128,128,128,.25); border-radius: 16px; padding: 16px 20px; background: rgba(128,128,128,.06);}
+.hero .n {font-size: 1.25rem; font-weight: 700;}
+.hero .p {font-size: 2rem; font-weight: 800; line-height: 1.3;}
+.note {font-size: .85rem; opacity: .75;}
+button[data-baseweb="tab"] {font-size: 1rem;}
+</style>
+''', unsafe_allow_html=True)
 
 
 def _mtime(path):
@@ -43,16 +70,36 @@ def show(fig):
     st.plotly_chart(fig, width='stretch')
 
 
-def price_chart(s, title):
-    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.72, 0.28], vertical_spacing=0.04)
-    fig.add_trace(go.Scatter(x=s.index, y=s, name='收盤價'), row=1, col=1)
-    for n, nm in ((20, '月線'), (60, '季線'), (240, '年線')):
-        fig.add_trace(go.Scatter(x=s.index, y=s.rolling(n).mean(), name=nm, line=dict(width=1)), row=1, col=1)
-    fig.add_trace(go.Scatter(x=s.index, y=core.rsi(s), name='RSI', showlegend=False), row=2, col=1)
-    fig.add_hline(y=70, line_dash='dot', line_color='gray', row=2, col=1)
-    fig.add_hline(y=30, line_dash='dot', line_color='gray', row=2, col=1)
-    fig.update_layout(title=title, height=520, hovermode='x unified', margin=dict(l=10, r=10),
-                      legend=dict(orientation='h', y=1.08))
+def color_of(x):
+    return UP if x > 0 else DOWN if x < 0 else FLAT
+
+
+def chg_html(x, fmt='{:+.2%}'):
+    arrow = '▲' if x > 0 else '▼' if x < 0 else '■'
+    return f'<span style="color:{color_of(x)}">{arrow} {fmt.format(x)}</span>'
+
+
+def kpi(title, value, change_html='', sub=''):
+    return (f'<div class="kpi"><div class="t">{title}</div><div class="v">{value}</div>'
+            f'<div class="c">{change_html}</div><div class="s">{sub}</div></div>')
+
+
+def price_chart(s, title, days=None):
+    if days:
+        s_full, s = s, s.tail(days)
+    else:
+        s_full = s
+    ma = {n: s_full.rolling(n).mean().reindex(s.index) for n in (20, 60, 240)}
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.74, 0.26], vertical_spacing=0.04)
+    fig.add_trace(go.Scatter(x=s.index, y=s, name='收盤價', line=dict(width=2, color='#3b6fe0')), row=1, col=1)
+    for (n, nm), c in zip(((20, '月線'), (60, '季線'), (240, '年線')), ('#f5a623', '#9b59d0', '#7f8c8d')):
+        fig.add_trace(go.Scatter(x=s.index, y=ma[n], name=nm, line=dict(width=1.1, color=c)), row=1, col=1)
+    fig.add_trace(go.Scatter(x=s.index, y=core.rsi(s_full).reindex(s.index), name='RSI', showlegend=False,
+                             line=dict(color='#3b6fe0', width=1.2)), row=2, col=1)
+    fig.add_hrect(y0=70, y1=100, fillcolor=UP, opacity=0.08, line_width=0, row=2, col=1)
+    fig.add_hrect(y0=0, y1=30, fillcolor=DOWN, opacity=0.08, line_width=0, row=2, col=1)
+    fig.update_layout(title=title, height=500, hovermode='x unified', margin=dict(l=10, r=10, t=50, b=10),
+                      legend=dict(orientation='h', y=1.1))
     fig.update_yaxes(range=[0, 100], title_text='RSI', row=2, col=1)
     return fig
 
@@ -76,10 +123,17 @@ def lookup(code, M):
                         '若代號正確，可能是資料來源暫時限流，請稍後再試。')
 
 
+# ───────────── 載入資料 ─────────────
 META = json.load(open(core.META_JSON, encoding='utf-8')) if os.path.exists(core.META_JSON) else {}
 
-st.title('美股 × 台股 整合分析')
-st.caption(f"資料更新時間：{META.get('updated_at', '尚未更新')}（台北時間）　｜　僅供研究與學習，不構成投資建議")
+st.title('📈 美股 × 台股 整合分析')
+stale = ''
+try:
+    age = (datetime.now() - datetime.strptime(META['updated_at'], '%Y-%m-%d %H:%M')).days
+    stale = f'　⚠️ 已 {age} 天沒更新' if age >= 4 else ''
+except Exception:
+    pass
+st.caption(f"資料更新：{META.get('updated_at', '尚未更新')}（台北時間）{stale}　｜　僅供研究與學習，不構成投資建議　｜　顏色：紅漲、綠跌")
 
 if not os.path.exists(core.PRICES_CSV):
     st.warning('尚無資料。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
@@ -88,27 +142,44 @@ if not os.path.exists(core.PRICES_CSV):
 M = get_market(_mtime(core.PRICES_CSV))
 NEWS = get_news(_mtime(core.NEWS_CSV))
 SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.SUMMARY_MD) else ''
-
 FUND = fundamentals.load()
 PROB = probmodel.load()
 
-tab_sum, tab_stock, tab_fund, tab_prob, tab_score, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
-    ['今日摘要', '個股查詢', '公司體質', '漲跌機率', '模型成績單', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
+# 標的清單：台股個股 → 美股個股 → 指數
+ORDER = ([t for t in M.tw_cols if not t.startswith('^')] + [t for t in M.us_cols if not t.startswith('^')]
+         + [t for t in M.tw_cols + M.us_cols if t.startswith('^')])
 
-with tab_sum:
-    st.markdown(SUMMARY, unsafe_allow_html=True)
+TREND_SHORT = {'長期與中期趨勢都向上': '多頭', '長期趨勢向上，但近期轉弱': '高檔轉弱',
+               '長期趨勢偏弱，近期有反彈': '弱勢反彈', '長期與中期趨勢都偏弱': '空頭'}
 
-with tab_stock:
-    with st.form('lookup'):
-        code = st.text_input('股票代號', placeholder='台股輸入數字（2330、0050），美股輸入英文（NVDA、TSLA）')
-        go_btn = st.form_submit_button('查詢', type='primary')
-    if go_btn and code.strip():
-        name, s, err = lookup(code, M)
-        if err:
-            st.error(err)
-        else:
-            st.markdown(core.describe_stock(s, name))
-            show(price_chart(s, name))
+
+def series(t):
+    return M.close_all[t].dropna()
+
+
+def fund_of(t):
+    if not FUND:
+        return None
+    return FUND.get('tw', {}).get(t[:-3]) if t.endswith('.TW') else FUND.get('us', {}).get(t)
+
+
+def fund_total(t):
+    d = fund_of(t)
+    return None if d is None else d['total']
+
+
+def trend_up(t):
+    """趨勢多空：收盤價在季線之上，且季線比 20 個交易日前高才算「多」。"""
+    s = series(t)
+    ma = s.rolling(60).mean()
+    if len(s) < 90:
+        return None
+    return bool(s.iloc[-1] > ma.iloc[-1] and ma.iloc[-1] > ma.iloc[-21])
+
+
+def prob_of(t, h='5'):
+    return ((PROB or {}).get('predictions', {}).get(t, {}) or {}).get(h)
+
 
 def fmt_metric(key, v):
     if v is None:
@@ -116,129 +187,70 @@ def fmt_metric(key, v):
     return f'{v:.1%}' if fundamentals.METRICS[key][1] == 'pct' else f'{v:.2f} 倍'
 
 
-with tab_fund:
-    if not FUND or not (FUND.get('tw') or FUND.get('us')):
-        st.info('尚無公司體質資料。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
-    else:
-        st.caption(f"更新：{FUND['updated_at']}　｜　台股：{FUND.get('tw_period', '—')}；美股：yfinance 最新一季與近四季　｜　"
-                   '評分是用固定門檻換算的粗略尺度（0 分最差、100 分最好），僅供研究，不構成投資建議。')
-        pool = {}
-        for code, v in FUND.get('tw', {}).items():
-            pool[f"{v['name']}（{code}）"] = v
-        for code, v in FUND.get('us', {}).items():
-            pool[f"{v['name']}（{code}）"] = v
-        pick = st.selectbox('選擇個股（關注清單內）', list(pool))
-        d = pool[pick]
+tab_home, tab_stock, tab_market, tab_news, tab_model = st.tabs(['🏠 總覽', '🔎 個股', '🌐 市場', '📰 新聞', '🧪 模型'])
 
-        c1, c2 = st.columns([1, 2])
-        c1.metric('體質綜合分數', '—' if d['total'] is None else f"{d['total']:.0f} / 100", d['grade'], delta_color='off')
-        c2.markdown(d['verdict'])
+# ═════════════════════════ 總覽 ═════════════════════════
+with tab_home:
+    cards = []
+    for t, nm in (('^TWII', '加權指數'), ('^SOX', '費城半導體（美股）'), ('^GSPC', 'S&P 500')):
+        if t in M.close_all.columns:
+            s_ = series(t)
+            cards.append(kpi(nm, f'{s_.iloc[-1]:,.0f}', chg_html(s_.iloc[-1] / s_.iloc[-2] - 1), f'資料至 {s_.index[-1]:%m/%d}'))
+    fx = M.usdtwd
+    cards.append(kpi('美元兌新台幣', f'{fx.iloc[-1]:.2f}', chg_html(fx.iloc[-1] / fx.iloc[-2] - 1), '數字變大＝台幣貶值'))
+    prem = M.adr_premium()
+    if '台積電' in prem.columns:
+        p = prem['台積電'].dropna()
+        cards.append(kpi('台積電 ADR 溢價', f'{p.iloc[-1]:+.1%}',
+                         f'<span style="color:{FLAT}">近一年平均 {p.tail(core.TRADING_DAYS).mean():+.1%}</span>', 'ADR 比台股貴多少'))
+    st.markdown('<div class="kgrid">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
 
-        cats = [k for k in fundamentals.DIMENSIONS if d['scores'].get(k) is not None]
-        vals = [d['scores'][k] for k in cats]
-        left, right = st.columns(2)
-        if cats:
-            fig = go.Figure(go.Scatterpolar(r=vals + vals[:1], theta=cats + cats[:1], fill='toself', name=pick))
-            fig.update_layout(polar=dict(radialaxis=dict(range=[0, 100])), height=360, showlegend=False,
-                              margin=dict(l=30, r=30, t=30, b=30))
-            left.plotly_chart(fig, width='stretch')
-        with right:
-            for dim in fundamentals.DIMENSIONS:
-                sc = d['scores'].get(dim)
-                st.markdown(f'**{dim}**　{"資料不足" if sc is None else f"{sc:.0f} 分"}')
-                st.progress(0 if sc is None else int(sc))
-                rows = [{'指標': fundamentals.METRICS[k][0], '數值': fmt_metric(k, d['metrics'].get(k)),
-                         '意思': fundamentals.METRICS[k][2]}
-                        for k, _, _ in fundamentals.SCORING[dim] if k in d['metrics']]
-                if rows:
-                    with st.expander('看計算依據'):
-                        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+    st.markdown('#### 關注清單')
+    rows = []
+    for t in ORDER:
+        s = series(t)
+        if len(s) < 3:
+            continue
+        pr = prob_of(t, '5')
+        rows.append({
+            '標的': core.label(t), '市場': '美股' if M.is_us(t) else '台股', '收盤': float(s.iloc[-1]),
+            '日漲跌': float(s.iloc[-1] / s.iloc[-2] - 1) * 100, '近 60 日': s.tail(60).tolist(),
+            '趨勢': TREND_SHORT.get(core.trend_word(s), '—'), 'RSI': float(core.rsi(s).iloc[-1]),
+            '體質分': fund_total(t), '1 週上漲機率*': None if pr is None else pr['prob'] * 100})
+    tbl = pd.DataFrame(rows)
 
-        st.subheader('同業比較')
-        st.caption(f"比較對象：{d['peer_label']}。「同業排名」：100 = 同業中最好、0 = 最差（對該指標而言，如負債比、本益比是越低越好）。")
-        prow = []
-        for r in d['peers']:
-            nm = fundamentals.METRICS[r['key']][0]
-            prow.append({'指標': nm, '本檔': fmt_metric(r['key'], r['mine']), '同業中位數': fmt_metric(r['key'], r['median']),
-                         '同業排名': '樣本太少' if r['rank'] is None else f"{r['rank']}（共 {r['n']} 家）"})
-        st.dataframe(pd.DataFrame(prow), hide_index=True, width='stretch')
-        with st.expander('評分怎麼算？限制是什麼？'):
-            st.markdown('\n'.join([
-                '- 每個指標依固定門檻換算成 0～100 分（例如營業利益率 0% 得 0 分、25% 以上得 100 分），'
-                '面向分數是該面向指標的平均，綜合分數是五個面向的平均。',
-                '- 門檻是通用尺度，**不分產業**：代工、零售本來毛利低，所以請搭配上面的「同業比較」看。',
-                '- 「股東回報」只看現金殖利率，成長股常把錢拿去再投資或買回庫藏股，分數偏低不代表不好。',
-                '- 估值越便宜分數越高，但高成長公司本益比本來就高；「成長強、估值貴」要留意預期落空的風險。',
-                '- 台股損益是年初累計數，ROE 以累計淨利年化估算，季節性強的公司會失真；'
-                '獲利年增率台股暫缺（證交所資料沒有去年同期）。',
-                '- 美股 ADR 若財報幣別與股價不同，不計股價淨值比。美股同業只有關注清單內的幾檔，樣本少。',
-                '- ETF（如 0050）與指數沒有公司財報，不在此列。',
-            ]))
+    def _color(v):
+        return f'color: {color_of(v)}; font-weight: 600' if pd.notna(v) else ''
 
-def trend_state(t):
-    """趨勢多空：收盤價在季線之上，且季線比 20 個交易日前高，才算「多」。"""
-    if t not in M.close_all.columns:
-        return None
-    s = M.close_all[t].dropna()
-    ma = s.rolling(60).mean()
-    if len(s) < 90:
-        return None
-    return bool(s.iloc[-1] > ma.iloc[-1] and ma.iloc[-1] > ma.iloc[-21])
+    sty = tbl.style.map(_color, subset=['日漲跌'])
+    st.dataframe(sty, hide_index=True, width='stretch', height=min(40 + 36 * len(tbl), 520), column_config={
+        '收盤': st.column_config.NumberColumn(format='%,.2f'),
+        '日漲跌': st.column_config.NumberColumn(format='%+.2f%%'),
+        '近 60 日': st.column_config.LineChartColumn(width='small'),
+        'RSI': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='高於 70 偏熱、低於 30 偏冷'),
+        '體質分': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='公司體質綜合分數（個股分頁有細項）'),
+        '1 週上漲機率*': st.column_config.NumberColumn(format='%.0f%%', help='模型機率，歷史驗證沒勝過基準，僅供參考'),
+    })
+    st.caption('*模型在歷史驗證中沒有勝過「永遠猜漲」基準，機率只是貼近歷史上漲比例的參考，不要當進出依據（詳見「🧪 模型」）。')
 
-
-def fund_total(t):
-    if not FUND:
-        return None
-    d = FUND.get('us', {}).get(t) if not t.endswith('.TW') else FUND.get('tw', {}).get(t[:-3])
-    return None if d is None else d['total']
-
-
-with tab_prob:
-    if not PROB or not PROB.get('predictions'):
-        st.info('尚無模型結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
-    else:
-        st.caption(f"更新：{PROB['updated_at']}　｜　預測的是「未來 N 個交易日後收盤價高於今天」的機率，不是買賣建議。")
-        val = PROB['validation']
-        n_ok = sum(1 for mk in val.values() for r in mk.values() if r and r['beats_baseline'])
-        n_all = sum(1 for mk in val.values() for r in mk.values() if r)
-        if n_ok == 0:
-            st.warning('**請先看這裡：** 這個模型在「按時間切分」的歷史驗證中，**沒有勝過**最簡單的基準（永遠猜漲／永遠猜歷史上漲比例）。'
-                       '意思是：只靠價量、美股隔夜、匯率這些資料，目前還抓不到可靠的規律。下方機率只是貼近歷史上漲比例的參考，'
-                       '不要拿來當進出依據。')
-        else:
-            st.info(f'{n_all} 組驗證中有 {n_ok} 組勝過基準；沒勝過的組別，機率請特別保守看待。')
-
-        names = {core.label(t): t for t in PROB['predictions']}
-        pick = st.selectbox('選擇標的', list(names), key='prob_pick')
-        t = names[pick]
-        preds = PROB['predictions'][t]
-        cols = st.columns(len(preds))
-        for col, (h, p) in zip(cols, sorted(preds.items(), key=lambda kv: int(kv[0]))):
-            col.metric(f"未來 {PROB['horizons'][h]}（{h} 個交易日）上漲機率", f"{p['prob']:.0%}",
-                       f"歷史上這段期間平均 {p['base']:.0%} 會漲", delta_color='off')
-        any_p = next(iter(preds.values()))
-        st.caption(f"資料截至 {any_p['as_of']} 收盤。台股預測只用嚴格早於該日的美股收盤價。")
-        st.markdown('**這次機率主要受哪些因素影響**（以 1 週預測為例）')
-        for f in (preds.get('5') or any_p)['factors']:
-            st.markdown(f"- {f['name']}：{f['value']} → **{f['effect']}** 上漲機率")
-
-        st.subheader('體質好壞 × 趨勢多空')
-        st.caption('體質：「公司體質」分頁的綜合分數 55 分以上算好。趨勢：收盤價在季線（60 日均線）之上、且季線比 20 個交易日前高算「多」。'
-                   '這是描述現況的對照表，不是買賣訊號。')
+    left, right = st.columns([3, 2])
+    with left:
+        st.markdown('#### 體質好壞 × 趨勢多空')
+        st.caption('體質：公司體質綜合分 55 分以上算好。趨勢：收盤價在季線之上、且季線比 20 個交易日前高算「多」。描述現況，不是買賣訊號。')
         cells = {(True, True): [], (True, False): [], (False, True): [], (False, False): []}
         nodata = []
-        for tt in list(M.sel_us) + list(M.sel_tw) + [x for x in M.us_cols + M.tw_cols if x not in M.sel_us + M.sel_tw]:
+        for tt in ORDER:
             if tt.startswith('^'):
                 continue
-            ft, tr = fund_total(tt), trend_state(tt)
+            ft, tr = fund_total(tt), trend_up(tt)
             if ft is None or tr is None:
                 nodata.append(core.label(tt))
             else:
-                cells[(ft >= 55, tr)].append(f'{core.label(tt)} {ft:.0f} 分')
-        desc = {(True, True): ('體質好 ＋ 趨勢多', '基本面與股價走勢都偏正面。'),
-                (True, False): ('體質好 ＋ 趨勢空', '公司體質不差但股價走弱，可能是市場有疑慮或正在修正，值得查原因。'),
-                (False, True): ('體質普通／弱 ＋ 趨勢多', '股價強但體質普通，可能靠題材或資金推動，波動風險較高。'),
-                (False, False): ('體質普通／弱 ＋ 趨勢空', '基本面與股價走勢都偏弱。')}
+                cells[(ft >= 55, tr)].append(f'{core.NAMES.get(tt, tt)} {ft:.0f}')
+        desc = {(True, True): ('體質好 ＋ 趨勢多', '基本面與走勢都偏正面'),
+                (True, False): ('體質好 ＋ 趨勢空', '體質不差但股價走弱，值得查原因'),
+                (False, True): ('體質普通 ＋ 趨勢多', '股價強但體質普通，波動風險較高'),
+                (False, False): ('體質普通 ＋ 趨勢空', '基本面與走勢都偏弱')}
         for row in ((True, True), (True, False)), ((False, True), (False, False)):
             for col, key in zip(st.columns(2), row):
                 with col.container(border=True):
@@ -247,102 +259,192 @@ with tab_prob:
                     st.markdown('、'.join(cells[key]) if cells[key] else '（目前沒有）')
         if nodata:
             st.caption('無體質或趨勢資料（ETF、資料不足）：' + '、'.join(nodata))
+    with right:
+        st.markdown('#### 今日摘要')
+        with st.container(border=True, height=560):
+            st.markdown(SUMMARY, unsafe_allow_html=True)
 
-        st.subheader('模型成績（按時間切分的歷史驗證）')
-        st.caption('做法：只用某個時間點「以前」的資料訓練，預測「之後」半年，再往後滾動；訓練與驗證之間隔開預測天數，避免偷看未來。'
-                   'AUC 0.5 代表跟亂猜一樣、越高越好；Brier 分數是機率誤差，越低越好，要低於「基準」才算有用。')
-        rows = []
-        for mk, mname in (('tw', '台股'), ('us', '美股')):
-            for h, r in sorted(val.get(mk, {}).items(), key=lambda kv: int(kv[0])):
-                if not r:
-                    continue
-                rows.append({'市場': mname, '期間': PROB['horizons'][h], '驗證樣本': r['n'], 'AUC': f"{r['auc']:.3f}",
-                             '模型命中率': f"{r['acc']:.1%}", '永遠猜漲命中率': f"{r['acc_always_up']:.1%}",
-                             'Brier（模型）': f"{r['brier']:.4f}", 'Brier（基準）': f"{r['brier_base']:.4f}",
-                             '結論': '勝過基準' if r['beats_baseline'] else '沒勝過基準'})
-        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
-        with st.expander('怎麼讀這張表？為什麼可能沒勝過基準？'):
-            st.markdown(chr(10).join([
-                '- 這幾年股市大多在漲，所以「永遠猜漲」本身就有 56%～65% 的命中率，是很難超越的基準。',
-                '- 只用價量、美股隔夜、匯率，資訊量有限；短期漲跌多半是隨機的，模型沒勝過基準是常見且誠實的結果。',
-                '- 樣本只有約 5 年，且相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
-                '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，這是後續改進的方向。',
-                '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度，皆未勝過基準；沒有再針對驗證期反覆調參。']))
-
-with tab_score:
-    LOGDF = scorecard.evaluate(M.close_all)
-    ok, n_log, bad = scorecard.verify_log()
-    if LOGDF.empty:
-        st.info('成績單還沒有紀錄。每日更新跑過一次之後，就會開始記錄每天的判斷。')
+# ═════════════════════════ 個股 ═════════════════════════
+with tab_stock:
+    c1, c2 = st.columns([2, 1])
+    labels = {core.label(t): t for t in ORDER}
+    pick = c1.selectbox('選擇標的', list(labels), key='stock_pick')
+    other = c2.text_input('或輸入其他代號', placeholder='台股 2603、美股 TSLA', key='stock_other')
+    live = None
+    if other.strip():
+        name, s_live, err = lookup(other, M)
+        if err:
+            st.error(err)
+        else:
+            live = (name, s_live)
+    if live:
+        t, name, s = None, live[0], live[1]
     else:
-        SC = scorecard.summarize(LOGDF)
-        st.caption(f"紀錄從 {LOGDF['made_at'].min():%Y-%m-%d} 開始，之後每個交易日自動新增；不回填歷史（回填就是事後諸葛）。"
-                   '到期後用真實收盤價對答案。')
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric('累計判斷', f"{SC['total']} 筆")
-        c2.metric('已到期對答案', f"{SC['resolved']} 筆")
-        c3.metric('還沒到期', f"{SC['pending']} 筆")
-        c4.metric('紀錄完整性', '✅ 完整' if ok else '⚠️ 異常', f'{n_log} 筆已驗證' if ok else f'第 {bad} 列起不一致', delta_color='off')
-        if not ok:
-            st.error(f'紀錄檔的防竄改雜湊鏈在第 {bad} 列起不一致，代表檔案被改動過或損毀，下列成績不可信。')
-        if SC['resolved'] < 30:
-            st.warning(f"目前只有 {SC['resolved']} 筆到期，樣本太少，命中率的起伏大多是運氣，請不要據此下結論。"
-                       '1 週期的判斷最快一週後到期；建議累積至少數百筆再看。')
+        t = labels[pick]
+        name, s = core.label(t), series(t)
 
-        st.subheader('命中率：模型 vs「永遠猜漲」')
-        st.caption(f'命中 = 模型說漲機率 ≥ 50% 且真的漲，或說 < 50% 且真的沒漲。「近期」只看判斷日在最近 {scorecard.RECENT_DAYS} 天內的紀錄。'
-                   'Brier 是機率誤差，越低越好，要低於「基準」（只猜歷史上漲比例）才算有用。')
+    last, ch = s.iloc[-1], s.iloc[-1] / s.iloc[-2] - 1
+    pills = [f"<span class='pill'>{TREND_SHORT.get(core.trend_word(s), '趨勢：資料不足')}</span>",
+             f"<span class='pill'>RSI {core.rsi(s).iloc[-1]:.0f}</span>"]
+    if t:
+        fd, pr = fund_of(t), prob_of(t, '5')
+        if fd:
+            pills.append(f"<span class='pill'>體質 {fd['total']:.0f} 分（{fd['grade']}）</span>")
+        if pr:
+            pills.append(f"<span class='pill'>1 週上漲機率 {pr['prob']:.0%}（參考）</span>")
+    st.markdown(f"<div class='hero'><div class='n'>{name}</div><div class='p'>{last:,.2f} {chg_html(ch)}</div>"
+                f"<div>{''.join(pills)}</div><div class='note'>資料至 {s.index[-1]:%Y-%m-%d}</div></div>", unsafe_allow_html=True)
 
-        def fmt_stats(st_):
-            if not st_['n']:
-                return ['0', '—', '—', '—', '—']
-            return [str(st_['n']), f"{st_['hit']:.1%}", f"{st_['always_up']:.1%}", f"{st_['brier']:.4f}", f"{st_['brier_base']:.4f}"]
+    t_chart, t_fund, t_prob, t_news = st.tabs(['走勢', '公司體質', '漲跌機率', '相關新聞'])
 
-        rows = []
-        for r in SC['rows']:
-            for scope, key in (('累計', 'all'), ('近期', 'recent')):
-                rows.append(dict(zip(['範圍', '期間', '已到期筆數', '模型命中率', '永遠猜漲命中率', 'Brier（模型）', 'Brier（基準）'],
-                                     [scope, r['label']] + fmt_stats(r[key]))))
-        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+    with t_chart:
+        rng = st.segmented_control('期間', ['3 個月', '6 個月', '1 年', '全部'], default='1 年', key='rng')
+        days = {'3 個月': 63, '6 個月': 126, '1 年': 252, '全部': None}[rng or '1 年']
+        st.markdown(chr(10).join(core.describe_stock(s, name).split(chr(10))[2:]))      # 標題與價格已在上方卡片
+        show(price_chart(s, name, days))
+        with st.expander('名詞說明'):
+            st.markdown(core.GLOSSARY, unsafe_allow_html=True)
 
-        res = LOGDF[LOGDF['resolved']].sort_values('resolved_at')
-        if len(res) >= 5:
-            g = res.groupby('resolved_at').agg(hit=('hit', 'sum'), up=('outcome', 'sum'), n=('hit', 'count')).cumsum()
-            line = pd.DataFrame({'模型累計命中率': g['hit'] / g['n'], '永遠猜漲累計命中率': g['up'] / g['n']})
-            fig = px.line(line, height=340, title='累計命中率（依到期日）')
-            fig.update_layout(yaxis_tickformat='.0%', hovermode='x unified', legend_title='', margin=dict(l=10, r=10))
+    with t_fund:
+        d = fund_of(t) if t else None
+        if t is None:
+            st.info('其他代號只提供走勢；公司體質僅限關注清單內的個股。')
+        elif d is None:
+            st.info('這檔是指數或 ETF，沒有公司財報，因此沒有體質評分。')
+        else:
+            st.caption(f"更新：{FUND['updated_at']}　｜　台股：{FUND.get('tw_period', '—')}；美股：yfinance 最新一季　｜　"
+                       '評分用固定門檻換算（0 最差、100 最好），僅供研究。')
+            a, b = st.columns([1, 2])
+            a.metric('體質綜合分數', f"{d['total']:.0f} / 100", d['grade'], delta_color='off')
+            b.markdown(d['verdict'])
+            cats = [k for k in fundamentals.DIMENSIONS if d['scores'].get(k) is not None]
+            vals = [d['scores'][k] for k in cats]
+            left, right = st.columns(2)
+            if cats:
+                fig = go.Figure(go.Scatterpolar(r=vals + vals[:1], theta=cats + cats[:1], fill='toself', name=name,
+                                                line=dict(color='#3b6fe0')))
+                fig.update_layout(polar=dict(radialaxis=dict(range=[0, 100])), height=360, showlegend=False,
+                                  margin=dict(l=30, r=30, t=30, b=30))
+                left.plotly_chart(fig, width='stretch')
+            with right:
+                for dim in fundamentals.DIMENSIONS:
+                    sc = d['scores'].get(dim)
+                    st.markdown(f'**{dim}**　{"資料不足" if sc is None else f"{sc:.0f} 分"}')
+                    st.progress(0 if sc is None else int(sc))
+                    mrows = [{'指標': fundamentals.METRICS[k][0], '數值': fmt_metric(k, d['metrics'].get(k)),
+                              '意思': fundamentals.METRICS[k][2]}
+                             for k, _, _ in fundamentals.SCORING[dim] if k in d['metrics']]
+                    if mrows:
+                        with st.expander('看計算依據'):
+                            st.dataframe(pd.DataFrame(mrows), hide_index=True, width='stretch')
+            st.markdown('##### 同業比較')
+            st.caption(f"比較對象：{d['peer_label']}。「同業排名」100 = 同業最好、0 = 最差（負債比、本益比等越低越好的指標已反向計算）。")
+            prow = [{'指標': fundamentals.METRICS[r['key']][0], '本檔': fmt_metric(r['key'], r['mine']),
+                     '同業中位數': fmt_metric(r['key'], r['median']),
+                     '同業排名': '樣本太少' if r['rank'] is None else f"{r['rank']}（共 {r['n']} 家）"} for r in d['peers']]
+            st.dataframe(pd.DataFrame(prow), hide_index=True, width='stretch')
+            with st.expander('評分怎麼算？限制是什麼？'):
+                st.markdown(chr(10).join([
+                    '- 每個指標依固定門檻換算成 0～100 分（例如營業利益率 0% 得 0 分、25% 以上得 100 分），面向分數是該面向指標的平均，綜合分數是五個面向的平均。',
+                    '- 門檻不分產業：代工、零售本來毛利低，所以請搭配同業比較看。',
+                    '- 「股東回報」只看現金殖利率，成長股常把錢拿去再投資或買回庫藏股，分數偏低不代表不好。',
+                    '- 估值越便宜分數越高，但高成長公司本益比本來就高；「成長強、估值貴」要留意預期落空的風險。',
+                    '- 台股損益是年初累計數，ROE 以累計淨利年化估算；獲利年增率台股暫缺（證交所沒有去年同期）。',
+                    '- 美股 ADR 若財報幣別與股價不同，不計股價淨值比。美股同業只有關注清單內的幾檔。']))
+
+    with t_prob:
+        preds = (PROB or {}).get('predictions', {}).get(t) if t else None
+        if t is None:
+            st.info('其他代號只提供走勢；漲跌機率僅限關注清單內的標的。')
+        elif not preds:
+            st.info('尚無這檔的模型結果。')
+        else:
+            st.warning('模型在按時間切分的歷史驗證中**沒有勝過**「永遠猜漲」基準，下面的機率只是貼近歷史上漲比例的參考，不要當進出依據。')
+            cols = st.columns(len(preds))
+            for col, (h, p) in zip(cols, sorted(preds.items(), key=lambda kv: int(kv[0]))):
+                col.metric(f"未來 {PROB['horizons'][h]}（{h} 個交易日）上漲機率", f"{p['prob']:.0%}",
+                           f"歷史上平均 {p['base']:.0%} 會漲", delta_color='off')
+            any_p = next(iter(preds.values()))
+            st.caption(f"資料截至 {any_p['as_of']} 收盤；台股預測只用嚴格早於該日的美股收盤價。")
+            st.markdown('**這次機率主要受哪些因素影響**（以 1 週預測為例）')
+            for f in (preds.get('5') or any_p)['factors']:
+                st.markdown(f"- {f['name']}：{f['value']} → **{f['effect']}** 上漲機率")
+
+    with t_news:
+        code = t.split('.')[0] if t else re.sub(r'\.(TW|TWO)$', '', (live[0] if live else '')).upper()
+        if not code:
+            st.info('沒有相關新聞。')
+        else:
+            hit = NEWS[NEWS['ticker'].str.split(',').map(lambda cs: code in cs)] if len(NEWS) else NEWS
+            if hit.empty:
+                st.info(f'新聞庫裡目前沒有 {code} 的相關新聞（累積中）。')
+            else:
+                for r in hit.head(15).itertuples():
+                    when = r.time.strftime('%m-%d %H:%M') if pd.notna(r.time) else ''
+                    st.markdown(f"- [{r.title}]({r.url})　<span class='note'>{r.source}・{when}</span>", unsafe_allow_html=True)
+
+# ═════════════════════════ 市場 ═════════════════════════
+with tab_market:
+    t_perf, t_link, t_adr = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價'])
+
+    with t_perf:
+        options = M.sel_us + M.sel_tw
+        c1, c2 = st.columns([3, 1])
+        picks = c1.multiselect('標的', options, default=options, format_func=core.label)
+        currency = c2.radio('計價幣別', ['新台幣', '美元', '各自原幣'])
+        if picks:
+            px_df = M.normalized(picks, currency)
+            nm = px_df / px_df.iloc[0] * 100
+            fig = go.Figure()
+            for tt in nm.columns:
+                fig.add_trace(go.Scatter(x=nm.index, y=nm[tt], name=core.label(tt),
+                                         line=dict(dash='solid' if M.is_us(tt) else 'dot')))
+            fig.update_layout(title=f'累積績效（起點 = 100，{currency}；實線美股、虛線台股）', yaxis_type='log',
+                              hovermode='x unified', height=480, margin=dict(l=10, r=10))
             show(fig)
+            stats = core.perf_stats(px_df).sort_values('夏普值', ascending=False)
+            for col in ['年化報酬', '年化波動', '最大回撤', '期間總報酬']:
+                stats[col] = stats[col].map('{:.1%}'.format)
+            stats['夏普值'] = stats['夏普值'].map('{:.2f}'.format)
+            st.dataframe(stats, width='stretch')
+            if len(picks) >= 2:
+                corr = px_df.resample('W-FRI').last().pct_change().dropna(how='all').corr()
+                corr.index = corr.columns = [core.NAMES.get(tt, tt) for tt in corr.columns]
+                fig = px.imshow(corr, text_auto='.2f', color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
+                                aspect='auto', title='週報酬相關係數（越接近 1，越常一起漲跌）', height=480)
+                fig.update_layout(margin=dict(l=10, r=10))
+                show(fig)
 
-        st.subheader('機率校準')
-        st.caption('模型說「約 X% 會漲」的那些判斷，實際漲的比例有沒有接近 X%。兩欄越接近，機率越可信。')
-        if SC['calibration']:
-            st.dataframe(pd.DataFrame([{'模型給的機率區間': c['range'], '筆數': c['n'], '平均預測機率': f"{c['pred']:.0%}",
-                                        '實際上漲比例': f"{c['actual']:.0%}"} for c in SC['calibration']]),
-                         hide_index=True, width='stretch')
-        else:
-            st.caption('還沒有到期的紀錄。')
+    with t_link:
+        c1, c2 = st.columns(2)
+        us = c1.selectbox('美股指標', M.sel_us, index=M.sel_us.index(core.US_LEAD) if core.US_LEAD in M.sel_us else 0,
+                          format_func=core.label)
+        tw = c2.selectbox('台股標的', M.sel_tw, index=M.sel_tw.index(core.TW_TARGET) if core.TW_TARGET in M.sel_tw else 0,
+                          format_func=core.label)
+        pair, bucket = M.leadlag(us, tw)
+        k, b = np.polyfit(pair['us'], pair['tw'], 1)
+        st.markdown(f'樣本 {len(pair)} 天，相關係數 **{pair.us.corr(pair.tw):.2f}**；美股每漲 1%，台股隔日平均變動 '
+                    f'**{k:.2f}%**；方向一致比例 **{(np.sign(pair.us) == np.sign(pair.tw)).mean():.0%}**')
+        fig = px.scatter(pair, x='us', y='tw', opacity=0.4, height=440, labels={'us': '美股隔夜報酬', 'tw': '台股隔日報酬'})
+        xs = np.array([pair.us.min(), pair.us.max()])
+        fig.add_trace(go.Scatter(x=xs, y=b + k * xs, mode='lines', name='迴歸線'))
+        fig.update_layout(xaxis_tickformat='.0%', yaxis_tickformat='.0%', margin=dict(l=10, r=10))
+        show(fig)
+        st.dataframe(pd.DataFrame({'美股隔夜': bucket.index.astype(str), '天數': bucket['天數'].values,
+                                   '台股平均報酬': bucket['台股平均報酬'].map('{:+.2%}'.format).values,
+                                   '台股上漲機率': bucket['台股上漲機率'].map('{:.0%}'.format).values}),
+                     hide_index=True, width='stretch')
+        st.caption('台股的隔日報酬是收盤對收盤，其中大部分通常在開盤跳空時就已反映。')
 
-        st.subheader('最近對過的答案')
-        if len(res):
-            recent = res.sort_values('resolved_at', ascending=False).head(40)
-            st.dataframe(pd.DataFrame({
-                '判斷日': recent['made_at'].dt.strftime('%Y-%m-%d'), '標的': [core.label(t) for t in recent['ticker']],
-                '期間(交易日)': recent['horizon'], '當時預測上漲機率': recent['prob'].map('{:.0%}'.format),
-                '到期日': recent['resolved_at'].dt.strftime('%Y-%m-%d'), '實際報酬': recent['ret'].map('{:+.1%}'.format),
-                '結果': ['✅ 猜對' if h == 1 else '❌ 猜錯' for h in recent['hit']]}), hide_index=True, width='stretch')
-        else:
-            st.caption('還沒有到期的紀錄。')
+    with t_adr:
+        fig = px.line(prem, height=460, title='ADR 相對台股的溢價（正）／折價（負）')
+        fig.add_hline(y=0, line_dash='dash', line_color='gray')
+        fig.update_layout(yaxis_tickformat='.0%', hovermode='x unified', legend_title='', margin=dict(l=10, r=10))
+        show(fig)
+        st.dataframe(pd.DataFrame({'最新': prem.ffill().iloc[-1], '近一年平均': prem.tail(core.TRADING_DAYS).mean(),
+                                   '期間最高': prem.max(), '期間最低': prem.min()}).map('{:+.1%}'.format), width='stretch')
 
-        with st.expander('這份成績單怎麼做的？可信在哪、限制在哪？'):
-            st.markdown(chr(10).join([
-                '- 每次每日更新，把當天對每檔標的、1／2／4 週的上漲機率寫進 `data/predictions_log.csv`。檔案只在檔尾新增，'
-                '每列帶 SHA-256 雜湊鏈，改動或刪除任何一列都會被上面的「紀錄完整性」抓到；GitHub 的 commit 歷史也能回頭查證。',
-                '- 同一個（判斷日, 標的, 期間）只記第一次，重跑不會覆蓋。',
-                '- 對答案不另外存檔：用到期日的收盤價直接算，結果由紀錄和價格決定。價格是還原權息後的收盤價，除權息時歷史價格可能有極小調整。',
-                '- 模型每次更新都用「截至當天所有已知結果」重新訓練（沒有偷看未來），所以這份成績單反映的是真實上線後的表現。',
-                '- 同一天不同標的的結果高度相關、相鄰日期的結果也重疊，實際獨立的樣本比筆數少，結論要更保守。',
-                '- 歷史回測（時間切分驗證）請看「漲跌機率」分頁；這裡是上線後的真實成績，兩者可以互相對照。']))
-
+# ═════════════════════════ 新聞 ═════════════════════════
 with tab_news:
     st.caption(f"累積 {len(NEWS)} 則　｜　" + '　｜　'.join(META.get('news_status', [])))
     c1, c2 = st.columns([1, 2])
@@ -351,70 +453,115 @@ with tab_news:
     df = NEWS if market == '全部' else NEWS[NEWS['market'] == market]
     if kw.strip():
         k = kw.strip()
-        df = df[df['title'].str.contains(k, case=False, regex=False)
-                | df['ticker'].str.contains(k, case=False, regex=False)]
+        df = df[df['title'].str.contains(k, case=False, regex=False) | df['ticker'].str.contains(k, case=False, regex=False)]
     view = pd.DataFrame({'時間': df['time'].dt.strftime('%m-%d %H:%M'), '來源': df['source'],
                          '標題': df['title'], '原文': df['url'], '相關代號': df['ticker']}).head(200)
     st.dataframe(view, hide_index=True, width='stretch', height=600,
                  column_config={'原文': st.column_config.LinkColumn(display_text='開啟', width='small'),
                                 '標題': st.column_config.TextColumn(width='large')})
 
-with tab_perf:
-    options = M.sel_us + M.sel_tw
-    c1, c2 = st.columns([3, 1])
-    picks = c1.multiselect('標的', options, default=options, format_func=core.label)
-    currency = c2.radio('計價幣別', ['新台幣', '美元', '各自原幣'])
-    if picks:
-        px_df = M.normalized(picks, currency)
-        nm = px_df / px_df.iloc[0] * 100
-        fig = go.Figure()
-        for t in nm.columns:
-            fig.add_trace(go.Scatter(x=nm.index, y=nm[t], name=core.label(t),
-                                     line=dict(dash='solid' if M.is_us(t) else 'dot')))
-        fig.update_layout(title=f'累積績效（起點 = 100，{currency}；實線美股、虛線台股）', yaxis_type='log',
-                          hovermode='x unified', height=480, margin=dict(l=10, r=10))
-        show(fig)
-        stats = core.perf_stats(px_df).sort_values('夏普值', ascending=False)
-        for c in ['年化報酬', '年化波動', '最大回撤', '期間總報酬']:
-            stats[c] = stats[c].map('{:.1%}'.format)
-        stats['夏普值'] = stats['夏普值'].map('{:.2f}'.format)
-        st.dataframe(stats, width='stretch')
-        if len(picks) >= 2:
-            corr = px_df.resample('W-FRI').last().pct_change().dropna(how='all').corr()
-            corr.index = corr.columns = [core.NAMES.get(t, t) for t in corr.columns]
-            fig = px.imshow(corr, text_auto='.2f', color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
-                            aspect='auto', title='週報酬相關係數（越接近 1，越常一起漲跌）', height=480)
-            fig.update_layout(margin=dict(l=10, r=10))
-            show(fig)
+# ═════════════════════════ 模型 ═════════════════════════
+with tab_model:
+    t_score, t_valid = st.tabs(['成績單（上線後的真實成績）', '歷史驗證（回測）'])
 
-with tab_link:
-    c1, c2 = st.columns(2)
-    us = c1.selectbox('美股指標', M.sel_us, index=M.sel_us.index(core.US_LEAD) if core.US_LEAD in M.sel_us else 0,
-                      format_func=core.label)
-    tw = c2.selectbox('台股標的', M.sel_tw, index=M.sel_tw.index(core.TW_TARGET) if core.TW_TARGET in M.sel_tw else 0,
-                      format_func=core.label)
-    pair, bucket = M.leadlag(us, tw)
-    k, b = np.polyfit(pair['us'], pair['tw'], 1)
-    st.markdown(f'樣本 {len(pair)} 天，相關係數 **{pair.us.corr(pair.tw):.2f}**；美股每漲 1%，台股隔日平均變動 '
-                f'**{k:.2f}%**；方向一致比例 **{(np.sign(pair.us) == np.sign(pair.tw)).mean():.0%}**')
-    fig = px.scatter(pair, x='us', y='tw', opacity=0.4, height=440,
-                     labels={'us': '美股隔夜報酬', 'tw': '台股隔日報酬'})
-    xs = np.array([pair.us.min(), pair.us.max()])
-    fig.add_trace(go.Scatter(x=xs, y=b + k * xs, mode='lines', name='迴歸線'))
-    fig.update_layout(xaxis_tickformat='.0%', yaxis_tickformat='.0%', margin=dict(l=10, r=10))
-    show(fig)
-    st.dataframe(pd.DataFrame({'美股隔夜': bucket.index.astype(str), '天數': bucket['天數'].values,
-                               '台股平均報酬': bucket['台股平均報酬'].map('{:+.2%}'.format).values,
-                               '台股上漲機率': bucket['台股上漲機率'].map('{:.0%}'.format).values}),
-                 hide_index=True, width='stretch')
-    st.caption('台股的隔日報酬是收盤對收盤，其中大部分通常在開盤跳空時就已反映。')
+    with t_score:
+        LOGDF = scorecard.evaluate(M.close_all)
+        ok, n_log, bad = scorecard.verify_log()
+        if LOGDF.empty:
+            st.info('成績單還沒有紀錄。每日更新跑過一次之後，就會開始記錄每天的判斷。')
+        else:
+            SC = scorecard.summarize(LOGDF)
+            st.caption(f"紀錄從 {LOGDF['made_at'].min():%Y-%m-%d} 開始，之後每個交易日自動新增；不回填歷史（回填就是事後諸葛）。到期後用真實收盤價對答案。")
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric('累計判斷', f"{SC['total']} 筆")
+            c2.metric('已到期對答案', f"{SC['resolved']} 筆")
+            c3.metric('還沒到期', f"{SC['pending']} 筆")
+            c4.metric('紀錄完整性', '✅ 完整' if ok else '⚠️ 異常', f'{n_log} 筆已驗證' if ok else f'第 {bad} 列起不一致', delta_color='off')
+            if not ok:
+                st.error(f'紀錄檔的防竄改雜湊鏈在第 {bad} 列起不一致，代表檔案被改動過或損毀，下列成績不可信。')
+            if SC['resolved'] < 30:
+                st.warning(f"目前只有 {SC['resolved']} 筆到期，樣本太少，命中率的起伏大多是運氣，請不要據此下結論。1 週期的判斷最快一週後到期。")
 
-with tab_adr:
-    prem = M.adr_premium()
-    fig = px.line(prem, height=460, title='ADR 相對台股的溢價（正）／折價（負）')
-    fig.add_hline(y=0, line_dash='dash', line_color='gray')
-    fig.update_layout(yaxis_tickformat='.0%', hovermode='x unified', legend_title='', margin=dict(l=10, r=10))
-    show(fig)
-    st.dataframe(pd.DataFrame({'最新': prem.ffill().iloc[-1], '近一年平均': prem.tail(core.TRADING_DAYS).mean(),
-                               '期間最高': prem.max(), '期間最低': prem.min()}).map('{:+.1%}'.format),
-                 width='stretch')
+            st.markdown('##### 命中率：模型 vs「永遠猜漲」')
+            st.caption(f'命中 = 模型說漲機率 ≥ 50% 且真的漲，或說 < 50% 且真的沒漲。「近期」只看判斷日在最近 {scorecard.RECENT_DAYS} 天內的紀錄。'
+                       'Brier 是機率誤差，越低越好，要低於「基準」才算有用。')
+
+            def fmt_stats(st_):
+                if not st_['n']:
+                    return ['0', '—', '—', '—', '—']
+                return [str(st_['n']), f"{st_['hit']:.1%}", f"{st_['always_up']:.1%}", f"{st_['brier']:.4f}", f"{st_['brier_base']:.4f}"]
+
+            srows = []
+            for r in SC['rows']:
+                for scope, key in (('累計', 'all'), ('近期', 'recent')):
+                    srows.append(dict(zip(['範圍', '期間', '已到期筆數', '模型命中率', '永遠猜漲命中率', 'Brier（模型）', 'Brier（基準）'],
+                                          [scope, r['label']] + fmt_stats(r[key]))))
+            st.dataframe(pd.DataFrame(srows), hide_index=True, width='stretch')
+
+            res = LOGDF[LOGDF['resolved']].sort_values('resolved_at')
+            if len(res) >= 5:
+                g = res.groupby('resolved_at').agg(hit=('hit', 'sum'), up=('outcome', 'sum'), n=('hit', 'count')).cumsum()
+                line = pd.DataFrame({'模型累計命中率': g['hit'] / g['n'], '永遠猜漲累計命中率': g['up'] / g['n']})
+                fig = px.line(line, height=340, title='累計命中率（依到期日）')
+                fig.update_layout(yaxis_tickformat='.0%', hovermode='x unified', legend_title='', margin=dict(l=10, r=10))
+                show(fig)
+
+            st.markdown('##### 機率校準')
+            st.caption('模型說「約 X% 會漲」的那些判斷，實際漲的比例有沒有接近 X%。兩欄越接近，機率越可信。')
+            if SC['calibration']:
+                st.dataframe(pd.DataFrame([{'模型給的機率區間': c['range'], '筆數': c['n'], '平均預測機率': f"{c['pred']:.0%}",
+                                            '實際上漲比例': f"{c['actual']:.0%}"} for c in SC['calibration']]),
+                             hide_index=True, width='stretch')
+            else:
+                st.caption('還沒有到期的紀錄。')
+
+            st.markdown('##### 最近對過的答案')
+            if len(res):
+                recent = res.sort_values('resolved_at', ascending=False).head(40)
+                st.dataframe(pd.DataFrame({
+                    '判斷日': recent['made_at'].dt.strftime('%Y-%m-%d'), '標的': [core.label(tt) for tt in recent['ticker']],
+                    '期間(交易日)': recent['horizon'], '當時預測上漲機率': recent['prob'].map('{:.0%}'.format),
+                    '到期日': recent['resolved_at'].dt.strftime('%Y-%m-%d'), '實際報酬': recent['ret'].map('{:+.1%}'.format),
+                    '結果': ['✅ 猜對' if h == 1 else '❌ 猜錯' for h in recent['hit']]}), hide_index=True, width='stretch')
+            else:
+                st.caption('還沒有到期的紀錄。')
+
+            with st.expander('這份成績單怎麼做的？可信在哪、限制在哪？'):
+                st.markdown(chr(10).join([
+                    '- 每次每日更新，把當天對每檔標的、1／2／4 週的上漲機率寫進 `data/predictions_log.csv`。檔案只在檔尾新增，每列帶 SHA-256 雜湊鏈，改動或刪除任何一列都會被「紀錄完整性」抓到；GitHub 的 commit 歷史也能回頭查證。',
+                    '- 同一個（判斷日, 標的, 期間）只記第一次，重跑不會覆蓋。',
+                    '- 對答案不另外存檔：用到期日的收盤價直接算。價格是還原權息後的收盤價，除權息時歷史價格可能有極小調整。',
+                    '- 模型每次更新都用「截至當天所有已知結果」重新訓練（沒有偷看未來）。',
+                    '- 同一天不同標的的結果高度相關、相鄰日期也重疊，實際獨立的樣本比筆數少，結論要更保守。']))
+
+    with t_valid:
+        if not PROB or not PROB.get('predictions'):
+            st.info('尚無模型結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            val = PROB['validation']
+            n_ok = sum(1 for mk in val.values() for r in mk.values() if r and r['beats_baseline'])
+            n_all = sum(1 for mk in val.values() for r in mk.values() if r)
+            if n_ok == 0:
+                st.warning('**請先看這裡：** 這個模型在「按時間切分」的歷史驗證中，**沒有勝過**最簡單的基準（永遠猜漲／永遠猜歷史上漲比例）。'
+                           '意思是：只靠價量、美股隔夜、匯率，目前還抓不到可靠的規律。個股頁的機率只是貼近歷史上漲比例的參考。')
+            else:
+                st.info(f'{n_all} 組驗證中有 {n_ok} 組勝過基準；沒勝過的組別，機率請特別保守看待。')
+            st.caption('做法：只用某個時間點「以前」的資料訓練，預測「之後」半年，再往後滾動；訓練與驗證之間隔開預測天數，避免偷看未來。'
+                       'AUC 0.5 代表跟亂猜一樣、越高越好；Brier 是機率誤差，越低越好，要低於「基準」才算有用。')
+            vrows = []
+            for mk, mname in (('tw', '台股'), ('us', '美股')):
+                for h, r in sorted(val.get(mk, {}).items(), key=lambda kv: int(kv[0])):
+                    if not r:
+                        continue
+                    vrows.append({'市場': mname, '期間': PROB['horizons'][h], '驗證樣本': r['n'], 'AUC': f"{r['auc']:.3f}",
+                                  '模型命中率': f"{r['acc']:.1%}", '永遠猜漲命中率': f"{r['acc_always_up']:.1%}",
+                                  'Brier（模型）': f"{r['brier']:.4f}", 'Brier（基準）': f"{r['brier_base']:.4f}",
+                                  '結論': '勝過基準' if r['beats_baseline'] else '沒勝過基準'})
+            st.dataframe(pd.DataFrame(vrows), hide_index=True, width='stretch')
+            with st.expander('怎麼讀這張表？為什麼可能沒勝過基準？'):
+                st.markdown(chr(10).join([
+                    '- 這幾年股市大多在漲，所以「永遠猜漲」本身就有 56%～65% 的命中率，是很難超越的基準。',
+                    '- 只用價量、美股隔夜、匯率，資訊量有限；短期漲跌多半是隨機的，沒勝過基準是常見且誠實的結果。',
+                    '- 樣本只有約 5 年，相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
+                    '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，是後續改進方向。',
+                    '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度皆未勝過基準；沒有再針對驗證期反覆調參。']))
