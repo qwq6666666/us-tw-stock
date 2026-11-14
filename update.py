@@ -7,7 +7,9 @@ from datetime import datetime, timezone, timedelta
 
 import core
 import fundamentals
+import institutional
 import model
+import outlook
 import scorecard
 
 
@@ -45,13 +47,28 @@ def main():
         status.append(f'公司體質：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     try:                                          # 漲跌機率模型：失敗時保留前一次的檔案
-        mres = model.build_all(market)
+        try:                                          # 法人買賣超：補最近幾天；失敗不影響模型（沒有就不用）
+            n_inst = institutional.update_recent()
+            status.append(f'法人買賣超：新增 {n_inst} 列')
+        except Exception as e:
+            status.append(f'法人買賣超：失敗（{type(e).__name__}: {str(e)[:80]}）')
+        mres = model.build_all(market, institutional.load())
         model.save(mres)
         added = scorecard.append_predictions(mres)          # 只新增、不修改；同一天重跑不會重複記
         status.append(f'模型成績單：新增 {added} 筆判斷紀錄')
+        resolved = scorecard.resolve_new(market.close_all)    # 剛到期的結果寫進只能新增的結果紀錄
+        status.append(f'模型成績單：新增 {resolved} 筆到期結果')
         status += ['漲跌機率模型：' + x for x in mres['status']]
     except Exception as e:
         status.append(f'漲跌機率模型：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 新聞前景模擬：用歷史新聞做不偷看未來的滾動模擬；失敗時保留前一次的檔案
+        ores = outlook.build_all(market.close_all)
+        if ores.get('summary'):
+            outlook.save(ores)
+        status.append(f"新聞前景模擬：{ores['n_news']} 則新聞、{ores.get('n_samples', 0)} 筆樣本")
+    except Exception as e:
+        status.append(f'新聞前景模擬：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     with open(core.SUMMARY_MD, 'w', encoding='utf-8') as f:
         f.write(core.build_summary(market))

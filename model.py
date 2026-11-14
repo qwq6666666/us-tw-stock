@@ -4,7 +4,8 @@
 - 台股、美股各訓練一個梯度提升樹（LightGBM），同一市場內的標的合併訓練。
 - 驗證一律按時間切分（walk-forward）：只用「過去」訓練、預測「之後」，訓練與驗證之間隔開預測天數，避免偷看未來。
 - 每次都與簡單基準比較（永遠猜漲／永遠猜歷史上漲比例）。結果存成 data/model.json，網頁只讀檔。
-- 尚未納入法人買賣超：證交所 OpenAPI 沒有歷史資料，需先逐日累積，列為後續工作。
+- 台股可加入法人買賣超特徵（institutional.py 回補的逐日資料；盤後才公布，所以判斷日 t 只用到 t-1 以前）。
+  是否採用由 A/B 驗證決定：同一套驗證期與參數，平均 AUC 較高才採用（規則事先固定）。
 輸出的是機率與主要影響因素，不是買賣建議。
 """
 import json
@@ -35,7 +36,13 @@ FEATURES = {
     'spx_5d':    'S&P 500 近 5 日報酬',
     'fx_20d':    '美元兌台幣近 20 日變化',
 }
-PCT_FEATURES = {k for k in FEATURES if k != 'rsi'}
+INST_FEATURES = {
+    'foreign_5d': '外資近 5 日買賣超（相對平常單日量）',
+    'trust_5d':   '投信近 5 日買賣超（相對平常單日量）',
+    'mkt_inst_5d': '全市場三大法人近 5 日買賣超（相對平常單日量）',
+}
+LABELS = {**FEATURES, **INST_FEATURES}
+BASE_COLS = list(FEATURES)
 # 刻意保守（淺樹、強正則化）：2026-11 試過 7 葉／3 葉／2 葉三種，價量特徵在驗證期都沒有勝過基準，
 # 因此選機率最貼近歷史基準的一組，不再針對驗證期繼續調參。
 LGB_PARAMS = dict(n_estimators=80, learning_rate=0.03, num_leaves=3, min_child_samples=300, subsample=0.8,
@@ -56,7 +63,22 @@ def _own_features(s):
     return f
 
 
-def market_features(m, market):
+def inst_features(inst, idx, code):
+    """法人買賣超特徵。盤後才公布 → shift(1)，判斷日 t 只用到 t-1 以前；以「近 5 日合計 ÷ 近 60 日平均單日絕對量」標準化。"""
+    def flow(series):
+        net = series.reindex(idx).shift(1)
+        den = net.abs().rolling(60, min_periods=20).mean()
+        return (net.rolling(5, min_periods=3).sum() / den).replace([np.inf, -np.inf], np.nan)
+    piv = lambda col: inst.pivot(index='date', columns='code', values=col)
+    out = pd.DataFrame(index=idx)
+    f, t_, a = piv('foreign'), piv('trust'), piv('total')
+    out['foreign_5d'] = flow(f[code]) if code in f.columns else np.nan
+    out['trust_5d'] = flow(t_[code]) if code in t_.columns else np.nan
+    out['mkt_inst_5d'] = flow(a['ALL']) if 'ALL' in a.columns else np.nan
+    return out
+
+
+def market_features(m, market, inst=None):
     """回傳（各標的的特徵表, 特徵所需的共同欄位）。美股隔夜一律只用嚴格早於當日的資料。"""
     if market == 'tw':
         idx = m.tw_close.index
@@ -84,7 +106,11 @@ def market_features(m, market):
         if len(s) < 300:
             continue
         f = _own_features(s).join(com.reindex(s.index))
-        out[t] = (s, f[list(FEATURES)])
+        cols = list(FEATURES)
+        if inst is not None and market == 'tw':
+            f = f.join(inst_features(inst, s.index, t.split('.')[0]))
+            cols += list(INST_FEATURES)
+        out[t] = (s, f[cols])
     return out
 
 
@@ -113,10 +139,11 @@ def _metrics(y, p, base_p):
     return out
 
 
-def walk_forward(ds, h):
+def walk_forward(ds, h, cols=None):
     """按時間切分驗證：每段只用早於該段（且隔開 h 個交易日）的資料訓練。回傳驗證摘要。"""
     import lightgbm as lgb
-    d = ds.dropna(subset=list(FEATURES) + ['y'])
+    cols = cols or BASE_COLS
+    d = ds.dropna(subset=BASE_COLS + ['y'])        # 法人特徵允許缺值（2023 年以前沒有資料）
     starts = [pd.Timestamp(x) for x in FOLD_STARTS]
     ends = starts[1:] + [d.index.max() + pd.Timedelta(days=1)]
     oof_y, oof_p, oof_base, folds = [], [], [], []
@@ -125,8 +152,8 @@ def walk_forward(ds, h):
         te = d[(d.index >= a) & (d.index < b)]
         if len(tr) < 1000 or len(te) < 50:
             continue
-        clf = lgb.LGBMClassifier(**LGB_PARAMS).fit(tr[list(FEATURES)], tr['y'])
-        p = clf.predict_proba(te[list(FEATURES)])[:, 1]
+        clf = lgb.LGBMClassifier(**LGB_PARAMS).fit(tr[cols], tr['y'])
+        p = clf.predict_proba(te[cols])[:, 1]
         base = float(tr['y'].mean())
         mt = _metrics(te['y'], p, base)
         folds.append({'start': a.strftime('%Y-%m'), 'n': mt['n'], 'auc': mt['auc'], 'acc': mt['acc'],
@@ -148,44 +175,66 @@ def walk_forward(ds, h):
 def _fmt(k, v):
     if v is None or v != v:
         return '—'
-    return f'{v:.0f}' if k == 'rsi' else f'{v:+.1%}'
+    if k == 'rsi':
+        return f'{v:.0f}'
+    if k in INST_FEATURES:
+        return f'{v:+.1f} 倍'
+    return f'{v:+.1%}'
 
 
-def predict_latest(ds, feats, h):
+def predict_latest(ds, feats, h, cols=None):
     """用全部已知結果訓練，預測每檔標的「最新一天」的上漲機率與主要影響因素。"""
     import lightgbm as lgb
-    d = ds.dropna(subset=list(FEATURES) + ['y'])
-    clf = lgb.LGBMClassifier(**LGB_PARAMS).fit(d[list(FEATURES)], d['y'])
+    cols = cols or BASE_COLS
+    d = ds.dropna(subset=BASE_COLS + ['y'])
+    clf = lgb.LGBMClassifier(**LGB_PARAMS).fit(d[cols], d['y'])
     base = float(d['y'].mean())
     out = {}
     for t, (s, f) in feats.items():
-        last = f.dropna()
+        last = f[cols].dropna(subset=BASE_COLS)
         if last.empty or last.index[-1] != s.index[-1]:
             continue
         x = last.iloc[[-1]]
-        p = float(clf.predict_proba(x[list(FEATURES)])[:, 1][0])
-        contrib = clf.predict(x[list(FEATURES)], pred_contrib=True)[0][:-1]      # 每個特徵把機率推高或壓低多少（log-odds）
+        p = float(clf.predict_proba(x[cols])[:, 1][0])
+        contrib = clf.predict(x[cols], pred_contrib=True)[0][:-1]      # 每個特徵把機率推高或壓低多少（log-odds）
         order = np.argsort(-np.abs(contrib))[:3]
-        cols = list(FEATURES)
         out[t] = {'as_of': s.index[-1].strftime('%Y-%m-%d'), 'prob': p, 'base': base,
-                  'factors': [{'name': FEATURES[cols[i]], 'value': _fmt(cols[i], x.iloc[0][cols[i]]),
+                  'factors': [{'name': LABELS[cols[i]], 'value': _fmt(cols[i], x.iloc[0][cols[i]]),
                                'effect': '推高' if contrib[i] > 0 else '壓低'} for i in order]}
     return out
 
 
-def build_all(m):
+def build_all(m, inst=None):
+    """inst：institutional.load() 的結果（可為 None）。台股若有足夠法人資料，做 A/B 驗證並依事先固定的規則決定是否採用。"""
     res = {'updated_at': pd.Timestamp.now(tz='Asia/Taipei').strftime('%Y-%m-%d %H:%M'),
-           'horizons': {str(h): n for h, n in HORIZONS.items()}, 'validation': {}, 'predictions': {}, 'status': []}
+           'horizons': {str(h): n for h, n in HORIZONS.items()}, 'validation': {}, 'predictions': {}, 'status': [],
+           'inst_ab': None}
+    if inst is not None and inst['date'].nunique() < 400:
+        inst = None                                    # 資料天數太少不可信，不使用
     for market, mname in (('tw', '台股'), ('us', '美股')):
-        feats = market_features(m, market)
-        res['validation'][market] = {}
+        feats = market_features(m, market, inst if market == 'tw' else None)
+        use_inst = market == 'tw' and inst is not None
+        all_cols = BASE_COLS + (list(INST_FEATURES) if use_inst else [])
+        dsets = {h: build_dataset(feats, h) for h in HORIZONS}
+        chosen = all_cols
+        if use_inst:
+            vb = {h: walk_forward(dsets[h], h, BASE_COLS) for h in HORIZONS}
+            vi = {h: walk_forward(dsets[h], h, all_cols) for h in HORIZONS}
+            auc = lambda v: float(np.mean([v[h]['auc'] for h in HORIZONS if v[h]]))
+            used = auc(vi) > auc(vb)                   # 事先固定的規則：平均 AUC 較高才採用法人特徵
+            chosen = all_cols if used else BASE_COLS
+            res['inst_ab'] = {'used': bool(used), 'auc_without': auc(vb), 'auc_with': auc(vi),
+                              'days': int(inst['date'].nunique()),
+                              'detail': {str(h): {'without': {k: vb[h][k] for k in ('auc', 'brier', 'brier_base')},
+                                                  'with': {k: vi[h][k] for k in ('auc', 'brier', 'brier_base')}}
+                                         for h in HORIZONS if vb[h] and vi[h]}}
+            res['validation'][market] = {str(h): (vi[h] if used else vb[h]) for h in HORIZONS}
+        else:
+            res['validation'][market] = {str(h): walk_forward(dsets[h], h, chosen) for h in HORIZONS}
         for h in HORIZONS:
-            ds = build_dataset(feats, h)
-            v = walk_forward(ds, h)
-            res['validation'][market][str(h)] = v
-            for t, p in predict_latest(ds, feats, h).items():
+            for t, p in predict_latest(dsets[h], feats, h, chosen).items():
                 res['predictions'].setdefault(t, {})[str(h)] = p
-        res['status'].append(f'{mname}：{len(feats)} 檔、{len(HORIZONS)} 個期間')
+        res['status'].append(f'{mname}：{len(feats)} 檔、{len(HORIZONS)} 個期間' + ('、含法人買賣超' if chosen is not BASE_COLS and use_inst else ''))
     return res
 
 
@@ -203,6 +252,7 @@ def load():
 
 
 if __name__ == '__main__':
-    r = build_all(core.load_market())
+    import institutional
+    r = build_all(core.load_market(), institutional.load())
     save(r)
     print('\n'.join(r['status']))
