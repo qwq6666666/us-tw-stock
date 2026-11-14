@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+data/news_history_state.json
+__pycache__/
+*.pyc
