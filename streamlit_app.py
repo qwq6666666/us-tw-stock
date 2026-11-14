@@ -12,6 +12,7 @@ from plotly.subplots import make_subplots
 
 import core
 import fundamentals
+import model as probmodel
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide')
 
@@ -88,9 +89,10 @@ NEWS = get_news(_mtime(core.NEWS_CSV))
 SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.SUMMARY_MD) else ''
 
 FUND = fundamentals.load()
+PROB = probmodel.load()
 
-tab_sum, tab_stock, tab_fund, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
-    ['今日摘要', '個股查詢', '公司體質', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
+tab_sum, tab_stock, tab_fund, tab_prob, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
+    ['今日摘要', '個股查詢', '公司體質', '漲跌機率', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
 
 with tab_sum:
     st.markdown(SUMMARY, unsafe_allow_html=True)
@@ -171,6 +173,100 @@ with tab_fund:
                 '- 美股 ADR 若財報幣別與股價不同，不計股價淨值比。美股同業只有關注清單內的幾檔，樣本少。',
                 '- ETF（如 0050）與指數沒有公司財報，不在此列。',
             ]))
+
+def trend_state(t):
+    """趨勢多空：收盤價在季線之上，且季線比 20 個交易日前高，才算「多」。"""
+    if t not in M.close_all.columns:
+        return None
+    s = M.close_all[t].dropna()
+    ma = s.rolling(60).mean()
+    if len(s) < 90:
+        return None
+    return bool(s.iloc[-1] > ma.iloc[-1] and ma.iloc[-1] > ma.iloc[-21])
+
+
+def fund_total(t):
+    if not FUND:
+        return None
+    d = FUND.get('us', {}).get(t) if not t.endswith('.TW') else FUND.get('tw', {}).get(t[:-3])
+    return None if d is None else d['total']
+
+
+with tab_prob:
+    if not PROB or not PROB.get('predictions'):
+        st.info('尚無模型結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+    else:
+        st.caption(f"更新：{PROB['updated_at']}　｜　預測的是「未來 N 個交易日後收盤價高於今天」的機率，不是買賣建議。")
+        val = PROB['validation']
+        n_ok = sum(1 for mk in val.values() for r in mk.values() if r and r['beats_baseline'])
+        n_all = sum(1 for mk in val.values() for r in mk.values() if r)
+        if n_ok == 0:
+            st.warning('**請先看這裡：** 這個模型在「按時間切分」的歷史驗證中，**沒有勝過**最簡單的基準（永遠猜漲／永遠猜歷史上漲比例）。'
+                       '意思是：只靠價量、美股隔夜、匯率這些資料，目前還抓不到可靠的規律。下方機率只是貼近歷史上漲比例的參考，'
+                       '不要拿來當進出依據。')
+        else:
+            st.info(f'{n_all} 組驗證中有 {n_ok} 組勝過基準；沒勝過的組別，機率請特別保守看待。')
+
+        names = {core.label(t): t for t in PROB['predictions']}
+        pick = st.selectbox('選擇標的', list(names), key='prob_pick')
+        t = names[pick]
+        preds = PROB['predictions'][t]
+        cols = st.columns(len(preds))
+        for col, (h, p) in zip(cols, sorted(preds.items(), key=lambda kv: int(kv[0]))):
+            col.metric(f"未來 {PROB['horizons'][h]}（{h} 個交易日）上漲機率", f"{p['prob']:.0%}",
+                       f"歷史上這段期間平均 {p['base']:.0%} 會漲", delta_color='off')
+        any_p = next(iter(preds.values()))
+        st.caption(f"資料截至 {any_p['as_of']} 收盤。台股預測只用嚴格早於該日的美股收盤價。")
+        st.markdown('**這次機率主要受哪些因素影響**（以 1 週預測為例）')
+        for f in (preds.get('5') or any_p)['factors']:
+            st.markdown(f"- {f['name']}：{f['value']} → **{f['effect']}** 上漲機率")
+
+        st.subheader('體質好壞 × 趨勢多空')
+        st.caption('體質：「公司體質」分頁的綜合分數 55 分以上算好。趨勢：收盤價在季線（60 日均線）之上、且季線比 20 個交易日前高算「多」。'
+                   '這是描述現況的對照表，不是買賣訊號。')
+        cells = {(True, True): [], (True, False): [], (False, True): [], (False, False): []}
+        nodata = []
+        for tt in list(M.sel_us) + list(M.sel_tw) + [x for x in M.us_cols + M.tw_cols if x not in M.sel_us + M.sel_tw]:
+            if tt.startswith('^'):
+                continue
+            ft, tr = fund_total(tt), trend_state(tt)
+            if ft is None or tr is None:
+                nodata.append(core.label(tt))
+            else:
+                cells[(ft >= 55, tr)].append(f'{core.label(tt)} {ft:.0f} 分')
+        desc = {(True, True): ('體質好 ＋ 趨勢多', '基本面與股價走勢都偏正面。'),
+                (True, False): ('體質好 ＋ 趨勢空', '公司體質不差但股價走弱，可能是市場有疑慮或正在修正，值得查原因。'),
+                (False, True): ('體質普通／弱 ＋ 趨勢多', '股價強但體質普通，可能靠題材或資金推動，波動風險較高。'),
+                (False, False): ('體質普通／弱 ＋ 趨勢空', '基本面與股價走勢都偏弱。')}
+        for row in ((True, True), (True, False)), ((False, True), (False, False)):
+            for col, key in zip(st.columns(2), row):
+                with col.container(border=True):
+                    st.markdown(f'**{desc[key][0]}**')
+                    st.caption(desc[key][1])
+                    st.markdown('、'.join(cells[key]) if cells[key] else '（目前沒有）')
+        if nodata:
+            st.caption('無體質或趨勢資料（ETF、資料不足）：' + '、'.join(nodata))
+
+        st.subheader('模型成績（按時間切分的歷史驗證）')
+        st.caption('做法：只用某個時間點「以前」的資料訓練，預測「之後」半年，再往後滾動；訓練與驗證之間隔開預測天數，避免偷看未來。'
+                   'AUC 0.5 代表跟亂猜一樣、越高越好；Brier 分數是機率誤差，越低越好，要低於「基準」才算有用。')
+        rows = []
+        for mk, mname in (('tw', '台股'), ('us', '美股')):
+            for h, r in sorted(val.get(mk, {}).items(), key=lambda kv: int(kv[0])):
+                if not r:
+                    continue
+                rows.append({'市場': mname, '期間': PROB['horizons'][h], '驗證樣本': r['n'], 'AUC': f"{r['auc']:.3f}",
+                             '模型命中率': f"{r['acc']:.1%}", '永遠猜漲命中率': f"{r['acc_always_up']:.1%}",
+                             'Brier（模型）': f"{r['brier']:.4f}", 'Brier（基準）': f"{r['brier_base']:.4f}",
+                             '結論': '勝過基準' if r['beats_baseline'] else '沒勝過基準'})
+        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+        with st.expander('怎麼讀這張表？為什麼可能沒勝過基準？'):
+            st.markdown(chr(10).join([
+                '- 這幾年股市大多在漲，所以「永遠猜漲」本身就有 56%～65% 的命中率，是很難超越的基準。',
+                '- 只用價量、美股隔夜、匯率，資訊量有限；短期漲跌多半是隨機的，模型沒勝過基準是常見且誠實的結果。',
+                '- 樣本只有約 5 年，且相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
+                '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，這是後續改進的方向。',
+                '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度，皆未勝過基準；沒有再針對驗證期反覆調參。']))
 
 with tab_news:
     st.caption(f"累積 {len(NEWS)} 則　｜　" + '　｜　'.join(META.get('news_status', [])))

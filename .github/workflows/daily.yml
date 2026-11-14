@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: 安裝套件
-        run: pip install yfinance pandas numpy requests
+        run: pip install yfinance pandas numpy requests lightgbm scikit-learn
       - name: 更新行情、新聞與摘要
         run: python update.py
       - name: 存回 GitHub（網頁會自動同步）

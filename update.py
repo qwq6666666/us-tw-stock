@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 import core
 import fundamentals
+import model
 
 
 def main():
@@ -41,6 +42,13 @@ def main():
         status += ['公司體質：' + x for x in fund['status']]
     except Exception as e:
         status.append(f'公司體質：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 漲跌機率模型：失敗時保留前一次的檔案
+        mres = model.build_all(market)
+        model.save(mres)
+        status += ['漲跌機率模型：' + x for x in mres['status']]
+    except Exception as e:
+        status.append(f'漲跌機率模型：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     with open(core.SUMMARY_MD, 'w', encoding='utf-8') as f:
         f.write(core.build_summary(market))
