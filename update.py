@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timezone, timedelta
 
 import core
+import fundamentals
 
 
 def main():
@@ -32,6 +33,14 @@ def main():
 
     news, status = core.fetch_all_news()
     archive = core.update_archive(news)
+
+    try:                                          # 公司體質：失敗時保留前一次的檔案，不影響其他更新
+        fund = fundamentals.build_all()
+        if fund['tw'] or fund['us']:
+            fundamentals.save(fund)
+        status += ['公司體質：' + x for x in fund['status']]
+    except Exception as e:
+        status.append(f'公司體質：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     with open(core.SUMMARY_MD, 'w', encoding='utf-8') as f:
         f.write(core.build_summary(market))

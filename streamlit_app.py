@@ -11,6 +11,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 import core
+import fundamentals
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide')
 
@@ -86,8 +87,10 @@ M = get_market(_mtime(core.PRICES_CSV))
 NEWS = get_news(_mtime(core.NEWS_CSV))
 SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.SUMMARY_MD) else ''
 
-tab_sum, tab_stock, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
-    ['今日摘要', '個股查詢', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
+FUND = fundamentals.load()
+
+tab_sum, tab_stock, tab_fund, tab_news, tab_perf, tab_link, tab_adr = st.tabs(
+    ['今日摘要', '個股查詢', '公司體質', '新聞', '績效比較', '美股 → 台股連動', 'ADR 溢價'])
 
 with tab_sum:
     st.markdown(SUMMARY, unsafe_allow_html=True)
@@ -103,6 +106,71 @@ with tab_stock:
         else:
             st.markdown(core.describe_stock(s, name))
             show(price_chart(s, name))
+
+def fmt_metric(key, v):
+    if v is None:
+        return '—'
+    return f'{v:.1%}' if fundamentals.METRICS[key][1] == 'pct' else f'{v:.2f} 倍'
+
+
+with tab_fund:
+    if not FUND or not (FUND.get('tw') or FUND.get('us')):
+        st.info('尚無公司體質資料。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+    else:
+        st.caption(f"更新：{FUND['updated_at']}　｜　台股：{FUND.get('tw_period', '—')}；美股：yfinance 最新一季與近四季　｜　"
+                   '評分是用固定門檻換算的粗略尺度（0 分最差、100 分最好），僅供研究，不構成投資建議。')
+        pool = {}
+        for code, v in FUND.get('tw', {}).items():
+            pool[f"{v['name']}（{code}）"] = v
+        for code, v in FUND.get('us', {}).items():
+            pool[f"{v['name']}（{code}）"] = v
+        pick = st.selectbox('選擇個股（關注清單內）', list(pool))
+        d = pool[pick]
+
+        c1, c2 = st.columns([1, 2])
+        c1.metric('體質綜合分數', '—' if d['total'] is None else f"{d['total']:.0f} / 100", d['grade'], delta_color='off')
+        c2.markdown(d['verdict'])
+
+        cats = [k for k in fundamentals.DIMENSIONS if d['scores'].get(k) is not None]
+        vals = [d['scores'][k] for k in cats]
+        left, right = st.columns(2)
+        if cats:
+            fig = go.Figure(go.Scatterpolar(r=vals + vals[:1], theta=cats + cats[:1], fill='toself', name=pick))
+            fig.update_layout(polar=dict(radialaxis=dict(range=[0, 100])), height=360, showlegend=False,
+                              margin=dict(l=30, r=30, t=30, b=30))
+            left.plotly_chart(fig, width='stretch')
+        with right:
+            for dim in fundamentals.DIMENSIONS:
+                sc = d['scores'].get(dim)
+                st.markdown(f'**{dim}**　{"資料不足" if sc is None else f"{sc:.0f} 分"}')
+                st.progress(0 if sc is None else int(sc))
+                rows = [{'指標': fundamentals.METRICS[k][0], '數值': fmt_metric(k, d['metrics'].get(k)),
+                         '意思': fundamentals.METRICS[k][2]}
+                        for k, _, _ in fundamentals.SCORING[dim] if k in d['metrics']]
+                if rows:
+                    with st.expander('看計算依據'):
+                        st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+
+        st.subheader('同業比較')
+        st.caption(f"比較對象：{d['peer_label']}。「同業排名」：100 = 同業中最好、0 = 最差（對該指標而言，如負債比、本益比是越低越好）。")
+        prow = []
+        for r in d['peers']:
+            nm = fundamentals.METRICS[r['key']][0]
+            prow.append({'指標': nm, '本檔': fmt_metric(r['key'], r['mine']), '同業中位數': fmt_metric(r['key'], r['median']),
+                         '同業排名': '樣本太少' if r['rank'] is None else f"{r['rank']}（共 {r['n']} 家）"})
+        st.dataframe(pd.DataFrame(prow), hide_index=True, width='stretch')
+        with st.expander('評分怎麼算？限制是什麼？'):
+            st.markdown('\n'.join([
+                '- 每個指標依固定門檻換算成 0～100 分（例如營業利益率 0% 得 0 分、25% 以上得 100 分），'
+                '面向分數是該面向指標的平均，綜合分數是五個面向的平均。',
+                '- 門檻是通用尺度，**不分產業**：代工、零售本來毛利低，所以請搭配上面的「同業比較」看。',
+                '- 「股東回報」只看現金殖利率，成長股常把錢拿去再投資或買回庫藏股，分數偏低不代表不好。',
+                '- 估值越便宜分數越高，但高成長公司本益比本來就高；「成長強、估值貴」要留意預期落空的風險。',
+                '- 台股損益是年初累計數，ROE 以累計淨利年化估算，季節性強的公司會失真；'
+                '獲利年增率台股暫缺（證交所資料沒有去年同期）。',
+                '- 美股 ADR 若財報幣別與股價不同，不計股價淨值比。美股同業只有關注清單內的幾檔，樣本少。',
+                '- ETF（如 0050）與指數沒有公司財報，不在此列。',
+            ]))
 
 with tab_news:
     st.caption(f"累積 {len(NEWS)} 則　｜　" + '　｜　'.join(META.get('news_status', [])))
