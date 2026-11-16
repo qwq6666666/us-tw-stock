@@ -11,6 +11,7 @@ import institutional
 import model
 import outlook
 import scorecard
+import trend
 import volmodel
 
 
@@ -65,6 +66,13 @@ def main():
         status += ['漲跌機率模型：' + x for x in mres['status']]
     except Exception as e:
         status.append(f'漲跌機率模型：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 趨勢規則實測與趨勢強度；失敗時保留前一次的檔案
+        tres = trend.build_all(market)
+        trend.save(tres)
+        status += ['趨勢實測：' + x for x in tres['status']]
+    except Exception as e:
+        status.append(f'趨勢實測：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     try:                                          # 波動預測：模型、只能新增的預測紀錄、到期結果；失敗時保留前一次的檔案
         vres = volmodel.build_all(market)

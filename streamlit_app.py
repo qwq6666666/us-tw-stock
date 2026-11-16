@@ -20,6 +20,7 @@ import fundamentals
 import model as probmodel
 import outlook
 import scorecard
+import trend
 import volmodel
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide', initial_sidebar_state='collapsed')
@@ -147,6 +148,7 @@ SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.
 FUND = fundamentals.load()
 PROB = probmodel.load()
 VOL = volmodel.load()
+TR = trend.load()
 
 # 標的清單：台股個股 → 美股個股 → 指數
 ORDER = ([t for t in M.tw_cols if not t.startswith('^')] + [t for t in M.us_cols if not t.startswith('^')]
@@ -217,7 +219,8 @@ with tab_home:
         rows.append({
             '標的': core.label(t), '市場': '美股' if M.is_us(t) else '台股', '收盤': float(s.iloc[-1]),
             '日漲跌': float(s.iloc[-1] / s.iloc[-2] - 1) * 100, '近 60 日': s.tail(60).tolist(),
-            '趨勢': TREND_SHORT.get(core.trend_word(s), '—'), 'RSI': float(core.rsi(s).iloc[-1]),
+            '趨勢': TREND_SHORT.get(core.trend_word(s), '—'), '趨勢強度': ((TR or {}).get('current', {}).get(t) or {}).get('z60'),
+            'RSI': float(core.rsi(s).iloc[-1]),
             '體質分': fund_total(t)})
     tbl = pd.DataFrame(rows)
 
@@ -229,6 +232,7 @@ with tab_home:
         '收盤': st.column_config.NumberColumn(format='%,.2f'),
         '日漲跌': st.column_config.NumberColumn(format='%+.2f%%'),
         '近 60 日': st.column_config.LineChartColumn(width='small'),
+        '趨勢強度': st.column_config.NumberColumn(format='%+.1f', help='近 60 日漲跌相當於平常波動的幾倍：±0.5 以內算盤整，超過 ±1.5 算強勢。描述現況，不是預測'),
         'RSI': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='高於 70 偏熱、低於 30 偏冷'),
         '體質分': st.column_config.ProgressColumn(min_value=0, max_value=100, format='%d', help='公司體質綜合分數（個股分頁有細項）'),
     })
@@ -293,6 +297,9 @@ with tab_stock:
             pills.append(f"<span class='pill'>體質 {fd['total']:.0f} 分（{fd['grade']}）</span>")
         if pr:
             pills.append(f"<span class='pill'>1 週上漲機率 {pr['prob']:.0%}（參考）</span>")
+    cur_tr = ((TR or {}).get('current', {}).get(t) or {}) if t else {}
+    if cur_tr.get('z60') is not None:
+        pills.append(f"<span class='pill'>趨勢強度 {cur_tr['z60']:+.1f}（{cur_tr['word']}）</span>")
     if t and VOL and VOL.get('predictions', {}).get(t, {}).get('5'):
         pills.append(f"<span class='pill'>波動{volmodel.level_word(VOL['predictions'][t]['5']['pct'])}</span>")
     st.markdown(f"<div class='hero'><div class='n'>{name}</div><div class='p'>{last:,.2f} {chg_html(ch)}</div>"
@@ -304,6 +311,9 @@ with tab_stock:
         rng = st.segmented_control('期間', ['3 個月', '6 個月', '1 年', '全部'], default='1 年', key='rng')
         days = {'3 個月': 63, '6 個月': 126, '1 年': 252, '全部': None}[rng or '1 年']
         st.markdown(chr(10).join(core.describe_stock(s, name).split(chr(10))[2:]))      # 標題與價格已在上方卡片
+        if cur_tr.get('z60') is not None and cur_tr.get('ret60') is not None:
+            st.caption(f"趨勢強度：近 60 個交易日漲跌 {cur_tr['ret60']:+.1%}，相當於這檔平常波動的 {cur_tr['z60']:+.1f} 倍 → {cur_tr['word']}。"
+                       '這是把漲跌幅除以波動後的尺度，方便不同股票互相比較；它描述現況，實測顯示對之後的漲跌沒有可靠的預示力（見「🌐 市場 → 趨勢規則實測」）。')
         show(price_chart(s, name, days))
         with st.expander('名詞說明'):
             st.markdown(core.GLOSSARY, unsafe_allow_html=True)
@@ -434,7 +444,7 @@ with tab_stock:
 
 # ═════════════════════════ 市場 ═════════════════════════
 with tab_market:
-    t_perf, t_link, t_adr = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價'])
+    t_perf, t_link, t_adr, t_rule = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價', '趨勢規則實測'])
 
     with t_perf:
         options = M.sel_us + M.sel_tw
@@ -492,6 +502,86 @@ with tab_market:
         show(fig)
         st.dataframe(pd.DataFrame({'最新': prem.ffill().iloc[-1], '近一年平均': prem.tail(core.TRADING_DAYS).mean(),
                                    '期間最高': prem.max(), '期間最低': prem.min()}).map('{:+.1%}'.format), width='stretch')
+
+    with t_rule:
+        if not TR or not TR.get('backtest'):
+            st.info('尚無趨勢實測結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            st.caption('這裡不預測漲跌，而是檢驗「跟著趨勢走」的常見規則，過去實際表現如何。規則和評判標準都在看結果前固定，沒有調參數。')
+            mk = 'tw' if st.radio('市場', ['台股', '美股'], horizontal=True, key='rule_mk') == '台股' else 'us'
+            bt = TR['backtest'].get(mk)
+            if not bt:
+                st.info('這個市場的資料不足。')
+            else:
+                P = TR['primary']
+                tp, pf = bt['tests'][P], bt['portfolio']
+                st.markdown(f"##### 主要規則：{TR['rules'][P]}（{bt['from']} ～ {bt['to']}，{bt['n_tickers']} 檔等權重）")
+                with st.container(border=True):
+                    st.markdown(('✅' if tp['q1_less_drawdown'] else '❌') + f" **大跌時少賠？** 組合最大回撤 {pf['bh']['mdd']:.0%} → {pf[P]['mdd']:.0%}，"
+                                f"{tp['mdd_better_count']}/{bt['n_tickers']} 檔標的回撤較小。")
+                    if tp['q3_better_return']:
+                        q3 = f"✅ **賺得比較多？** 每年多約 {tp['ret_diff']:.1%}。"
+                    elif tp['ret_ci'][1] is not None and tp['ret_ci'][1] < 0:
+                        q3 = (f"❌ **賺得比較多？** 沒有，而且明顯比較少：年化報酬 {pf['bh']['cagr']:.1%} → {pf[P]['cagr']:.1%}，"
+                              f"每年少約 {-tp['ret_diff']:.1%}（95% 信賴區間 {-tp['ret_ci'][1]:.1%}～{-tp['ret_ci'][0]:.1%}）。")
+                    else:
+                        q3 = (f"◯ **賺得比較多？** 沒有證據：年化報酬 {pf['bh']['cagr']:.1%} → {pf[P]['cagr']:.1%}，差距的信賴區間含 0。")
+                    st.markdown(q3)
+                    st.markdown(('✅' if tp['q2_better_sharpe'] else '◯') + f" **承擔每一分風險換到的報酬比較高？**（夏普值）{pf['bh']['sharpe']:.2f} → {pf[P]['sharpe']:.2f}，"
+                                + ('明顯較高。' if tp['q2_better_sharpe'] else '沒有證據顯示較好（差距的信賴區間含 0）。'))
+                    st.caption(f"這個規則平均只有 {tp['in_market']:.0%} 的時間持有、每年進出約 {tp['switches_per_year']:.0f} 次。"
+                               '白話結論：這段期間照趨勢規則做，少賠一些，但錯過的漲幅更多。')
+
+                st.dataframe(pd.DataFrame(
+                    [{'做法': '一直持有', '年化報酬': f"{pf['bh']['cagr']:.1%}", '最大回撤': f"{pf['bh']['mdd']:.1%}", '夏普值': f"{pf['bh']['sharpe']:.2f}",
+                      '年化波動': f"{pf['bh']['vol']:.1%}", '持有時間': '100%', '每年進出': '0', '回撤較小的標的': '—'}] +
+                    [{'做法': TR['rules'][k] + ('（主要）' if k == P else ''), '年化報酬': f"{pf[k]['cagr']:.1%}", '最大回撤': f"{pf[k]['mdd']:.1%}",
+                      '夏普值': f"{pf[k]['sharpe']:.2f}", '年化波動': f"{pf[k]['vol']:.1%}", '持有時間': f"{bt['tests'][k]['in_market']:.0%}",
+                      '每年進出': f"{bt['tests'][k]['switches_per_year']:.0f}", '回撤較小的標的': f"{bt['tests'][k]['mdd_better_count']}/{bt['n_tickers']}"}
+                     for k in TR['rules']]), hide_index=True, width='stretch')
+                st.caption('其餘三個規則只當參考：同時看好幾個規則，容易碰巧有一個看起來不錯。')
+
+                eq = bt['equity']
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=eq['dates'], y=eq['bh'], name='一直持有', line=dict(width=2.4, color='#3b6fe0')))
+                for k, col in zip(TR['rules'], ('#e5484d', '#f5a623', '#9b59d0', '#2f9e6b')):
+                    fig.add_trace(go.Scatter(x=eq['dates'], y=eq[k], name=TR['rules'][k], line=dict(width=1.3, color=col)))
+                fig.update_layout(title='等權重組合的累積淨值（起點 = 1，已扣交易成本）', yaxis_type='log', height=420, hovermode='x unified',
+                                  margin=dict(l=10, r=10, t=50, b=10), legend=dict(orientation='h', y=-0.15))
+                show(fig)
+
+                with st.expander('各標的明細（主要規則）'):
+                    st.dataframe(pd.DataFrame([{
+                        '標的': core.label(t), '起算日': v['from'], '一直持有 年化': f"{v['bh']['cagr']:.1%}", '規則 年化': f"{v['rules'][P]['cagr']:.1%}",
+                        '一直持有 最大回撤': f"{v['bh']['mdd']:.1%}", '規則 最大回撤': f"{v['rules'][P]['mdd']:.1%}",
+                        '持有時間': f"{v['rules'][P]['in_market']:.0%}", '進出次數': v['rules'][P]['switches']} for t, v in bt['per_ticker'].items()]),
+                        hide_index=True, width='stretch')
+
+                stt = (TR.get('states') or {}).get(mk)
+                if stt:
+                    st.markdown(f"##### 「趨勢多」和「趨勢空」之後 {TR['fwd']} 個交易日，實際發生什麼")
+                    rci, vci = stt['ret_diff_ci'], stt['vol_diff_ci']
+                    sig_r = rci[0] is not None and (rci[0] > 0 or rci[1] < 0)
+                    st.caption('趨勢多 = 收盤價在季線之上且季線上揚（與總覽的定義相同）。'
+                               + ('兩種狀態之後的報酬有明顯差別。' if sig_r else '兩種狀態之後的平均報酬**沒有明顯差別**（差距的信賴區間含 0）：趨勢標籤描述的是現況，對之後漲跌沒有可靠的預示力。'))
+                    st.dataframe(pd.DataFrame([{'當時狀態': nm, '樣本數': g['n'], f"之後 {TR['fwd']} 日平均報酬": f"{g['ret']:+.1%}",
+                                                '之後上漲比例': f"{g['up_rate']:.0%}", '之後的波動（年化）': f"{g['vol']:.0%}"}
+                                               for nm, g in (('趨勢多', stt['up']), ('趨勢空', stt['down']))]), hide_index=True, width='stretch')
+                    if stt.get('buckets'):
+                        st.markdown('依「趨勢強度」分組')
+                        st.dataframe(pd.DataFrame([{'趨勢強度': b['name'], '樣本數': b['n'], f"之後 {TR['fwd']} 日平均報酬": f"{b['ret']:+.1%}",
+                                                    '之後上漲比例': f"{b['up_rate']:.0%}", '之後的波動（年化）': f"{b['vol']:.0%}"} for b in stt['buckets']]),
+                                     hide_index=True, width='stretch')
+                        st.caption('如果趨勢強度能預示之後的漲跌，報酬應該由上到下有規律地變化；沒有規律就代表它只適合描述現況。')
+
+                with st.expander('怎麼做的？限制是什麼？'):
+                    st.markdown(chr(10).join([
+                        '- 第 t 日收盤後依規則決定，第 t+1 日才生效，不會用到當天還不知道的資訊。不持有時當作現金、報酬為 0（沒算利息）。',
+                        f"- 交易成本：每次進或出扣 {bt['cost']:.2%}（台股含手續費與證交稅的概估；美股以低成本估計）。",
+                        '- 每檔標的都從年線可計算的那天起算；指數不能直接買賣，這裡當作追蹤它的 ETF 來看。',
+                        '- 信賴區間用區塊拔靴法（考慮相鄰日期的相關性）。最大回撤只有一條歷史路徑，所以只能描述、無法檢定。',
+                        '- **最大的限制是期間**：2021 年底到現在，雖然包含 2022 年的下跌，但整體是大多頭。趨勢規則的價值主要出現在長時間的空頭（例如 2000、2008 年那種），這段資料檢驗不到。',
+                        '- 所以這個結果的正確讀法是：「在這五年，照趨勢規則做並沒有比較好」，而不是「趨勢規則永遠沒用」。']))
 
 # ═════════════════════════ 新聞 ═════════════════════════
 with tab_news:
