@@ -34,10 +34,10 @@ RES_CSV = os.path.join(core.DATA_DIR, 'vol_results.csv')
 LOG_FIELDS = ['made_at', 'ticker', 'horizon', 'pred', 'base', 'close', 'model_ver']      # pred/base：每日波動（模型／EWMA）
 RES_FIELDS = ['made_at', 'ticker', 'horizon', 'resolved_at', 'realized', 'ret']
 KEY = ['made_at', 'ticker', 'horizon']
-MODEL_VER = 'vol-v1'
+MODEL_VER = 'vol-v2'
 
 HORIZONS = {5: '1 週', 10: '2 週', 20: '4 週'}
-FOLD_STARTS = ['2024-01-01', '2024-07-01', '2025-01-01', '2025-07-01', '2026-01-01']
+FOLD_STARTS = [f'{y}-{m}-01' for y in range(2016, 2027) for m in ('01', '07')][:-1]   # 每段約半年，2016 年起（2026-07 之後尚無資料）；最後一段到資料結尾
 FLOOR = 5e-4                       # 每日波動下限（避免對 0 取對數）
 HAR_COLS = ['lv1', 'lv5', 'lv22', 'lv66', 'lmean']
 RANGE_COLS = ['lpk5', 'lpk22']                     # Parkinson 範圍波動（用最高／最低價），選用

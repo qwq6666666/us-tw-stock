@@ -10,7 +10,12 @@ import fundamentals
 import institutional
 import model
 import outlook
+import panel
+import volindex
+import regime
+import risk
 import scorecard
+import statelog
 import trend
 import relstrength
 import universe
@@ -40,9 +45,9 @@ def main():
     close.to_csv(core.PRICES_CSV, encoding='utf-8-sig')
     market = core.Market(close)
 
-    try:                                          # 擴充名單（台股 ~58、美股 ~38）的收盤、最高、最低、成交量；失敗時保留前一次的檔案
+    try:                                          # 擴充名單（台股 ~165、美股 ~186）的收盤、最高、最低、成交量；失敗時保留前一次的檔案
         uni_data, uni_dropped = universe.drop_unfinished(universe.download(universe.tickers()))
-        if len(uni_data['close'].columns) >= 80:
+        if len(uni_data['close'].columns) >= 200:
             universe.save(uni_data)
             uni_msg = f"擴充名單：{len(uni_data['close'].columns)} 檔" + ('；已略過尚未收盤的資料：' + '、'.join(uni_dropped) if uni_dropped else '')
         else:
@@ -103,6 +108,33 @@ def main():
         status.append(f'波動成績單：新增 {v_new} 筆預測、{v_done} 筆到期結果')
     except Exception as e:
         status.append(f'波動預測：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 大盤長歷史波動模型與合併面板模型；失敗時保留前一次的檔案
+        vires = volindex.build_all()
+        if vires['markets']:
+            volindex.save(vires)
+            status += ['大盤波動長歷史：' + x for x in vires['status']]
+        pres = panel.build_all(universe.load())
+        if pres['markets']:
+            panel.save(pres)
+            status += ['合併面板模型：' + x for x in pres['status']]
+    except Exception as e:
+        status.append(f'大盤波動長歷史／合併面板：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 市場狀態（HMM，1998 起的長歷史）與風險／部位大小；失敗時保留前一次的檔案
+        long_ = regime.refresh_long()
+        gres = regime.build_all(long_)
+        if gres['markets']:
+            regime.save(gres)
+            status += ['市場狀態：' + x for x in gres['status']]
+        kres = risk.build_all(long_)
+        risk.save(kres)
+        status += ['風險與部位：' + x for x in kres['status']]
+        added = statelog.append_daily(gres, kres, market.close_all)          # 只新增、不修改的狀態與部位紀錄
+        done = statelog.resolve_new(market.close_all)
+        status.append(f'狀態成績單：新增 {added} 筆判斷、{done} 筆到期結果')
+    except Exception as e:
+        status.append(f'市場狀態／風險：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     try:                                          # 新聞前景模擬：用歷史新聞做不偷看未來的滾動模擬；失敗時保留前一次的檔案
         ores = outlook.build_all(market.close_all)

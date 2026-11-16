@@ -26,7 +26,7 @@ ADR_PAIRS = {
     'ASX': ('3711.TW', 2,  '日月光投控'),
     'CHT': ('2412.TW', 10, '中華電信'),
 }
-START = '2021-01-01'
+START = '2010-01-01'      # 2026-11-17 由 2021 改為 2010：個股驗證期從約 5 年延長到約 15 年（涵蓋 2011、2015、2018、2020、2022 的下跌）
 FX_TICKER = 'TWD=X'          # 1 美元兌多少新台幣
 US_LEAD = '^SOX'             # 用哪個美股指標觀察對台股的影響
 TW_TARGET = '^TWII'
@@ -53,6 +53,24 @@ def label(t):
     return f'{NAMES[t]} ({t})' if t in NAMES else t
 
 
+def clean_breaks(df, limit_tw=0.15, limit_us=0.6):
+    """資料斷點防護（2010 起的長歷史才需要）：單日漲跌幅超過門檻，視為資料錯誤或股票重整（未還原的分割、代號被重複使用、分割出新公司），
+    該檔「最後一個斷點之前」的歷史全部丟掉，只保留之後連續的資料。台股漲跌幅限制 7%（2015 年起 10%），門檻取 15%；美股取 60%。
+    指數與匯率不處理。回傳（清理後的表, [(代號, 斷點日期), ...]）。規則在看結果前固定。"""
+    out, cut = df.copy(), []
+    for c in out.columns:
+        if str(c).startswith('^') or str(c).endswith('=X'):
+            continue
+        r = out[c].pct_change(fill_method=None).abs()
+        lim = limit_tw if str(c).endswith(('.TW', '.TWO')) else limit_us
+        bad = r[r > lim]
+        if len(bad):
+            d = bad.index[-1]
+            out.loc[out.index < d, c] = float('nan')
+            cut.append((c, d.strftime('%Y-%m-%d')))
+    return out, cut
+
+
 def download_close(tickers, start=START):
     """下載還原權息後的收盤價，回傳以日期為索引的表格。"""
     import yfinance as yf
@@ -63,6 +81,7 @@ def download_close(tickers, start=START):
     close = close.copy()
     close.index = pd.to_datetime(close.index).tz_localize(None)
     close.index.name = 'Date'
+    close, _ = clean_breaks(close)
     return close.dropna(how='all').dropna(axis=1, how='all')
 
 

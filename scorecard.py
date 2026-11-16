@@ -20,7 +20,7 @@ FIELDS = ['made_at', 'ticker', 'horizon', 'prob', 'base', 'model_ver', 'prev_has
 RESULTS_CSV = os.path.join(core.DATA_DIR, 'predictions_results.csv')
 R_FIELDS = ['made_at', 'ticker', 'horizon', 'resolved_at', 'close_start', 'close_end', 'outcome', 'prev_hash', 'hash']
 GENESIS = '0' * 64
-MODEL_VER = 'lgbm-shallow-v1'     # 模型設定有實質改動時改這個字串，成績會分開看得出來
+MODEL_VER = 'lgbm-shallow-v2'     # 模型設定有實質改動時改這個字串，成績會分開看得出來
 RECENT_DAYS = 60                  # 「近期」成績：只看判斷日在最近這幾個日曆天內的紀錄
 
 

@@ -34,8 +34,11 @@ BLOCK = 3
 ADRS = {'TSM', 'UMC', 'ASX', 'CHT'}
 
 
-def pool(close, market):
-    uni = U.TW_UNIVERSE if market == 'tw' else U.US_UNIVERSE
+def pool(close, market, core_only=False):
+    if core_only:
+        uni = U.TW_CORE if market == 'tw' else U.US_CORE
+    else:
+        uni = U.TW_UNIVERSE if market == 'tw' else U.US_UNIVERSE
     ex = {'0050.TW'} | (ADRS if market == 'us' else set())
     return [t for t in U.usable(close, uni) if t not in ex]
 
@@ -162,11 +165,21 @@ def build_all(data=None):
                                     'all': [round(float(x), 4) for x in cum['all']]}
         if idx_t in data['close'].columns:
             out['bias'] = universe_vs_index(close, data['close'][idx_t])
+        # 與原名單（現在的大型股）比較：擴充後偏誤是否變小？（描述性，兩個池子的主要訊號與等權重報酬）
+        ccols = pool(data['close'], market, core_only=True)
+        if len(ccols) >= MIN_STOCKS and len(ccols) < len(cols):
+            cclose = data['close'][ccols].dropna(how='all')
+            cev = evaluate(signals(cclose)[PRIMARY], cclose, month_ends(cclose.index))
+            out['core_pool'] = {'n_stocks': len(ccols), 'result': cev[0] if cev else None,
+                                'bias': universe_vs_index(cclose, data['close'][idx_t]) if idx_t in data['close'].columns else None}
+        out['unavailable'] = U.UNAVAILABLE
         out['current'] = current_table(close, data.get('volume'), market, names)
         res['markets'][market] = out
         r = out['results'].get(PRIMARY)
         if r:
-            res['status'].append(f"{mname} {len(cols)} 檔：12-1 動能 IC {r['ic_mean']:+.3f}，" + ('有證據' if r['has_evidence'] else '沒有證據'))
+            b, cb = out.get('bias'), (out.get('core_pool') or {}).get('bias')
+            gap = f"；名單等權重比大盤年化高 {b['gap']:+.1%}" + (f"（原名單 {cb['gap']:+.1%}）" if cb else '') if b else ''
+            res['status'].append(f"{mname} {len(cols)} 檔：12-1 動能 IC {r['ic_mean']:+.3f}，" + ('有證據' if r['has_evidence'] else '沒有證據') + gap)
     return res
 
 

@@ -18,7 +18,8 @@ import core
 
 MODEL_JSON = os.path.join(core.DATA_DIR, 'model.json')
 HORIZONS = {5: '1 週', 10: '2 週', 20: '4 週'}
-FOLD_STARTS = ['2024-01-01', '2024-07-01', '2025-01-01', '2025-07-01', '2026-01-01']   # 每段約半年，最後一段到資料結尾
+INST_AB_FROM = '2024-01-01'
+FOLD_STARTS = [f'{y}-{m}-01' for y in range(2016, 2027) for m in ('01', '07')][:-1]   # 每段約半年，2016 年起（2026-07 之後尚無資料）；最後一段到資料結尾
 FEATURES = {
     'ret_5':     '近 5 日報酬',
     'ret_20':    '近 20 日報酬',
@@ -139,12 +140,12 @@ def _metrics(y, p, base_p):
     return out
 
 
-def walk_forward(ds, h, cols=None):
+def walk_forward(ds, h, cols=None, min_start=None):
     """按時間切分驗證：每段只用早於該段（且隔開 h 個交易日）的資料訓練。回傳驗證摘要。"""
     import lightgbm as lgb
     cols = cols or BASE_COLS
     d = ds.dropna(subset=BASE_COLS + ['y'])        # 法人特徵允許缺值（2023 年以前沒有資料）
-    starts = [pd.Timestamp(x) for x in FOLD_STARTS]
+    starts = [pd.Timestamp(x) for x in FOLD_STARTS if min_start is None or pd.Timestamp(x) >= pd.Timestamp(min_start)]
     ends = starts[1:] + [d.index.max() + pd.Timedelta(days=1)]
     oof_y, oof_p, oof_base, folds = [], [], [], []
     for a, b in zip(starts, ends):
@@ -218,8 +219,8 @@ def build_all(m, inst=None):
         dsets = {h: build_dataset(feats, h) for h in HORIZONS}
         chosen = all_cols
         if use_inst:
-            vb = {h: walk_forward(dsets[h], h, BASE_COLS) for h in HORIZONS}
-            vi = {h: walk_forward(dsets[h], h, all_cols) for h in HORIZONS}
+            vb = {h: walk_forward(dsets[h], h, BASE_COLS, INST_AB_FROM) for h in HORIZONS}      # 法人資料 2023 年才有，A/B 只比有資料的折（2024 起，規則不變）
+            vi = {h: walk_forward(dsets[h], h, all_cols, INST_AB_FROM) for h in HORIZONS}
             auc = lambda v: float(np.mean([v[h]['auc'] for h in HORIZONS if v[h]]))
             used = auc(vi) > auc(vb)                   # 事先固定的規則：平均 AUC 較高才採用法人特徵
             chosen = all_cols if used else BASE_COLS
@@ -228,7 +229,7 @@ def build_all(m, inst=None):
                               'detail': {str(h): {'without': {k: vb[h][k] for k in ('auc', 'brier', 'brier_base')},
                                                   'with': {k: vi[h][k] for k in ('auc', 'brier', 'brier_base')}}
                                          for h in HORIZONS if vb[h] and vi[h]}}
-            res['validation'][market] = {str(h): (vi[h] if used else vb[h]) for h in HORIZONS}
+            res['validation'][market] = {str(h): walk_forward(dsets[h], h, chosen) for h in HORIZONS}      # 正式驗證用全部折（2016 起）
         else:
             res['validation'][market] = {str(h): walk_forward(dsets[h], h, chosen) for h in HORIZONS}
         for h in HORIZONS:

@@ -20,7 +20,12 @@ import fundamentals
 import model as probmodel
 import outlook
 import scorecard
+import panel
+import regime
 import relstrength
+import risk
+import statelog
+import volindex
 import trend
 import universe
 import volmodel
@@ -152,6 +157,10 @@ PROB = probmodel.load()
 VOL = volmodel.load()
 TR = trend.load()
 REL = relstrength.load()
+REG = regime.load()
+RISK = risk.load()
+PANEL = panel.load()
+VOLIDX = volindex.load()
 
 
 @st.cache_data(show_spinner=False)
@@ -219,6 +228,13 @@ with tab_home:
         cards.append(kpi('台積電 ADR 溢價', f'{p.iloc[-1]:+.1%}',
                          f'<span style="color:{FLAT}">近一年平均 {p.tail(core.TRADING_DAYS).mean():+.1%}</span>', 'ADR 比台股貴多少'))
     st.markdown('<div class="kgrid">' + ''.join(cards) + '</div>', unsafe_allow_html=True)
+
+    if REG and REG.get('markets'):
+        _bits = []
+        for _t, _m in REG['markets'].items():
+            _c = _m['current']
+            _bits.append(f"{_m['name']}：**{REG['state_names'][_c['state']]}**（空頭／高波動機率 {_c['probs']['bear']:.0%}）")
+        st.markdown('市場狀態（HMM）　' + '　｜　'.join(_bits) + '　<span class="note">以波動定義，不是買賣訊號；詳見「市場 → 市場狀態」</span>', unsafe_allow_html=True)
 
     st.markdown('#### 關注清單')
     rows = []
@@ -376,6 +392,19 @@ with tab_stock:
             fig.update_layout(title='波動的變化（年化，數字越大代表漲跌越劇烈）', height=340, yaxis_tickformat='.0%',
                               margin=dict(l=10, r=10, t=50, b=10), showlegend=False)
             show(fig)
+            rk_ = ((RISK or {}).get('current') or {}).get(t)
+            if rk_:
+                with st.container(border=True):
+                    st.markdown('**風險與部位（用波動預測算出的部位上限）**')
+                    q_ = rk_.get('quadrant')
+                    m_sd = rk_['daily20'] * np.sqrt(20)
+                    cA, cB, cC = st.columns(3)
+                    cA.metric('趨勢 × 波動', q_['name'] if q_ else '—')
+                    cB.metric('未來 4 週 ±1σ', f"±{m_sd:.1%}", '約 2/3 的情況落在這個範圍', delta_color='off')
+                    bud_ = (RISK.get('loss_budget') or 0.03)
+                    cC.metric(f"部位上限（預算 {bud_:.0%}）", f"{min(1.0, bud_ / (2 * m_sd)):.0%}" if m_sd > 0 else '—', '占整個投資組合的比例', delta_color='off')
+                    if q_:
+                        st.caption(q_['text'] + ' 預算可到「市場 → 風險與部位」調整。這是風險計算，不是買賣建議。')
             with st.expander('怎麼讀？限制是什麼？'):
                 st.markdown(chr(10).join([
                     '- 「±3.9%」的意思是：依模型估計，這段期間結束時的漲跌幅，大多數情況會落在正負這個數字以內。實際落在範圍內的比例寫在每張卡片上（不是保證）。',
@@ -464,7 +493,7 @@ with tab_stock:
 
 # ═════════════════════════ 市場 ═════════════════════════
 with tab_market:
-    t_perf, t_link, t_adr, t_rule, t_rel = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價', '趨勢規則實測', '相對強弱'])
+    t_perf, t_link, t_adr, t_rule, t_rel, t_reg, t_risk = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價', '趨勢規則實測', '相對強弱', '市場狀態', '風險與部位'])
 
     with t_perf:
         options = M.sel_us + M.sel_tw
@@ -600,8 +629,8 @@ with tab_market:
                         f"- 交易成本：每次進或出扣 {bt['cost']:.2%}（台股含手續費與證交稅的概估；美股以低成本估計）。",
                         '- 每檔標的都從年線可計算的那天起算；指數不能直接買賣，這裡當作追蹤它的 ETF 來看。',
                         '- 信賴區間用區塊拔靴法（考慮相鄰日期的相關性）。最大回撤只有一條歷史路徑，所以只能描述、無法檢定。',
-                        '- **最大的限制是期間**：2021 年底到現在，雖然包含 2022 年的下跌，但整體是大多頭。趨勢規則的價值主要出現在長時間的空頭（例如 2000、2008 年那種），這段資料檢驗不到。',
-                        '- 所以這個結果的正確讀法是：「在這五年，照趨勢規則做並沒有比較好」，而不是「趨勢規則永遠沒用」。']))
+                        f"- **最大的限制是期間**：{bt['from'][:4]} 年起，雖然包含 2011、2015、2018、2020、2022 的下跌，但整體偏多頭。趨勢規則的價值主要出現在長時間的空頭（例如 2000、2008 年那種），這段資料仍檢驗不到；大盤長歷史的檢驗見「市場狀態」分頁。",
+                        '- 所以這個結果的正確讀法是：「在這段期間，照趨勢規則做並沒有比較好」，而不是「趨勢規則永遠沒用」。']))
 
     with t_rel:
         if not REL or not REL.get('markets'):
@@ -631,6 +660,13 @@ with tab_market:
                         st.markdown('**⚠️ 存活者偏誤：先看這個**')
                         st.markdown(f"名單是「現在的」大型股。同一段期間，名單等權重年化報酬 **{bias['universe']:.1%}**，大盤指數 **{bias['index']:.1%}**，"
                                     f"名單多賺 **{bias['gap']:.1%}**。這個差距的一部分來自「現在是大型股的公司，過去多半表現好」，所以「強者恆強」會被高估，下面的數字都要往保守的方向修正。")
+                        cp_ = R_.get('core_pool')
+                        if cp_ and cp_.get('bias'):
+                            st.markdown(f"**名單擴充後：** 原本只有 {cp_['n_stocks']} 檔現在的大型股，名單多賺 **{cp_['bias']['gap']:.1%}**；"
+                                        f"擴充到 {R_['n_stocks']} 檔（加入中型股與這幾年表現不佳的公司）後，名單多賺 **{bias['gap']:.1%}**，偏誤明顯變小。"
+                                        + (f"動能的 IC 從 {cp_['result']['ic_mean']:+.3f} 變成 {P_['ic_mean']:+.3f}。" if cp_.get('result') and P_ else ''))
+                        if R_.get('unavailable'):
+                            st.caption('仍然無法消除：已下市、被併購或改代號而 Yahoo Finance 查不到的公司（例如 ' + '、'.join(R_['unavailable'][:6]) + '）沒有納入，所以仍有部分偏誤。')
                 if P_:
                     nm_ = REL['signals']
                     st.markdown('##### 各訊號的結果')
@@ -666,10 +702,153 @@ with tab_market:
                     st.markdown(chr(10).join([
                         '- 訊號：12-1 動能 = 前 12 個月報酬，跳過最近 1 個月（避開短期反轉），是學術文獻中最標準的定義。',
                         '- 每個月最後一個交易日排名，答案是下一個月底的報酬；只用當天已知的資料。各市場分開排名。',
-                        '- 判準（事先訂好）：每月 IC 的平均大於 0，且以月為單位的區塊拔靴法 95% 區間下界大於 0。月數只有約 57 個，統計檢定力有限，沒有證據不等於沒有效果。',
+                        '- 判準（事先訂好）：每月 IC 的平均大於 0，且以月為單位的區塊拔靴法 95% 區間下界大於 0。月數有限（見上方「驗證月份」），統計檢定力有限，沒有證據不等於沒有效果。',
                         '- 台股池不含 ETF，美股池不含 ADR（避免與台股重複）。名單固定、不是即時成分股；個別代號歷史不足會被略過。',
                         '- **存活者偏誤是最大的限制**，見上方方框；因此「沒有證據」可信，「有證據」則要打折。',
                         '- 成交量已一併存下來，目前只用在「量能比」這個描述欄位，沒有放進任何預測。']))
+
+    with t_rel:
+        if PANEL and PANEL.get('markets'):
+            st.markdown('##### 合併面板模型（把全部個股放在一起訓練）')
+            st.caption('每個市場把 160～180 檔合併訓練（原本個股模型只有 8～9 檔），預測「未來 20 日是否比同市場中位數強」。逐月重訓、不偷看未來；判準事先固定：IC 區間下界 > 0，且要高於單一 12-1 動能才算有加分。')
+            _rows = []
+            for _k, _v in PANEL['markets'].items():
+                _rows.append({'市場': '台股' if _k == 'tw' else '美股', '股票數': _v['n_stocks'], '測試期': f"{_v['from']} ～ {_v['to']}",
+                              '模型 IC': f"{_v['ic_model']:+.3f}", '95% 區間': f"{_v['ic_ci'][0]:+.3f} ～ {_v['ic_ci'][1]:+.3f}",
+                              '單一動能 IC': f"{_v['ic_base']:+.3f}", '模型 − 動能': f"{_v['ic_diff']:+.3f}",
+                              '前 20% − 後 20%（20 日）': f"{_v['spread_top_bottom']:+.2%}",
+                              '判定': ('有證據' if _v['has_evidence'] else '沒有證據') + '、' + ('勝過動能' if _v['beats_momentum'] else '未勝過動能')})
+            st.dataframe(pd.DataFrame(_rows), hide_index=True, width='stretch')
+            _tw_ = [("台股" if _k == 'tw' else "美股") for _k, _v in PANEL['markets'].items() if _v['beats_momentum']]
+            st.caption('讀法：看「模型 − 動能」的區間是否整段大於 0，才算多出來的特徵有加分；' + ('目前通過的市場：' + '、'.join(_tw_) + '。' if _tw_ else '目前沒有市場通過。')
+                       + '把名單分成「原本的現在大型股」與「後來加入的股票」，前者的 IC 通常較高，這是存活者偏誤的樣子，結果要打折；已下市或被併購的公司無法納入。'
+                       + f"測試期從 {PANEL['first_test'][:4]} 年起、以多頭為主，也是限制。")
+
+    with t_reg:
+        if not REG or not REG.get('markets'):
+            st.info('尚無市場狀態結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            st.caption('用隱馬可夫模型（HMM）把大盤分成「多頭／盤整／空頭（高波動）」三種狀態，並用 1998 年起、涵蓋 2008 與 2020 的長歷史做逐年重訓的樣本外檢驗。判準事先固定，沒有調參數。')
+            rk = st.radio('指數', list(REG['markets']), format_func=lambda k: REG['markets'][k]['name'], horizontal=True, key='reg_mk')
+            G = REG['markets'][rk]
+            cur, ev = G['current'], G['eval']
+            SN = REG['state_names']
+            c1, c2, c3 = st.columns(3)
+            c1.metric('目前狀態', SN[cur['state']], f"截至 {cur['as_of']}", delta_color='off')
+            c2.metric('空頭／高波動機率', f"{cur['probs']['bear']:.0%}", f"多頭 {cur['probs']['bull']:.0%}、盤整 {cur['probs']['range']:.0%}", delta_color='off')
+            c3.metric('這個狀態平均持續', f"約 {cur['expected_days'][cur['state']]:.0f} 個交易日", '由轉移機率推算', delta_color='off')
+            d_ = cur['desc'][cur['state']]
+            st.markdown(f"這個狀態的歷史特徵：每天平均震盪約 **{d_['daily_vol_pct']:.1f}%**、平均報酬 **{d_['daily_ret_pct']:+.2f}%**。"
+                        '注意：「空頭／高波動」是以**波動最大**來定義，不一定代表正在下跌；大幅下跌與大幅反彈都會被歸在這一類。')
+            bh_, rg_ = ev['bh'], ev['strategies']['regime']
+            st.markdown(f"##### 樣本外檢驗（{ev['from']} ～ {ev['to']}）")
+            st.caption('做法：狀態在收盤後判斷、隔天才生效；空頭／高波動狀態空手、其他持有；扣交易成本。每年用「前一年底以前」的資料重訓，不偷看未來。')
+            rows = []
+            for k, nm in (('bh', '一直持有'), ('regime', '市場狀態（空頭空手）'), ('ma60', '站上季線才持有'), ('ma240', '站上年線才持有')):
+                v = bh_ if k == 'bh' else ev['strategies'][k]
+                rows.append({'策略': nm, '年化報酬': f"{v['cagr']:.1%}", '夏普值': f"{v['sharpe']:.2f}", '最大回撤': f"{v['mdd']:.0%}",
+                             '持有比例': '100%' if k == 'bh' else f"{v['in_market']:.0%}", '每年進出': '—' if k == 'bh' else f"{v['switches_per_year']:.1f} 次"})
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
+            q1, q2, q3 = rg_['q1_less_drawdown'], rg_['q2_better_sharpe'], rg_['q3_better_return']
+            msg = (f"- 回撤是否較小：**{'是' if q1 else '否'}**（{rg_['mdd']:.0%} vs {bh_['mdd']:.0%}）\n"
+                   f"- 夏普值是否較高：**{'是' if q2 else '未證明'}**（差距 {rg_['sharpe_diff']:+.2f}，95% 區間 {rg_['sharpe_ci'][0]:+.2f} ～ {rg_['sharpe_ci'][1]:+.2f}）\n"
+                   f"- 年化報酬是否較高：**{'是' if q3 else '未證明'}**（差距 {rg_['ret_diff']:+.1%}，95% 區間 {rg_['ret_ci'][0]:+.1%} ～ {rg_['ret_ci'][1]:+.1%}）")
+            (st.success if (q2 or q3) else st.warning)(msg)
+            fig = go.Figure()
+            for key, nm, col in (('bh', '一直持有', '#8a8f98'), ('regime', '市場狀態', '#3b6fe0'), ('ma240', '年線規則', '#f5a623')):
+                fig.add_trace(go.Scatter(x=ev['equity']['dates'], y=ev['equity'][key], name=nm, line=dict(color=col, width=2)))
+            for a, b in ev['periods']:
+                fig.add_vrect(x0=a, x1=b, fillcolor='rgba(229,72,77,.12)', line_width=0)
+            fig.update_layout(title='累積淨值（起點 = 1；淡紅色 = 判斷為空頭／高波動的時期）', height=400, yaxis_type='log', hovermode='x unified',
+                              margin=dict(l=10, r=10, t=50, b=10), legend=dict(orientation='h', y=-0.15))
+            show(fig)
+            st.markdown('##### 各狀態之後 20 個交易日（描述性）')
+            st.dataframe(pd.DataFrame([{'狀態': SN[k], '占樣本天數': f"{v['share']:.0%}", '之後 20 日平均報酬': f"{v['fwd20_ret']:+.2%}",
+                                        '之後 20 日上漲比例': f"{v['up_rate']:.0%}", '之後 20 日年化波動': f"{v['fwd20_vol']:.0%}"} for k, v in ev['by_state'].items()]),
+                         hide_index=True, width='stretch')
+            st.caption(('狀態有分辨力：空頭／高波動之後的實際波動明顯高於多頭。' if ev['q4_vol_separates'] else '空頭／高波動之後的波動沒有高於多頭。')
+                       + '但之後的報酬方向沒有明顯差異：高波動期常伴隨急跌後的大反彈，所以這個模型適合「看風險」，不適合「猜漲跌」。')
+            with st.expander('怎麼讀？限制是什麼？'):
+                st.markdown(chr(10).join([
+                    '- 狀態用「濾波機率」，每天只用到當天為止的資料；轉折通常要幾天後才確認，所以一定有延遲。',
+                    f"- 狀態一年大約換 {ev['state_changes_per_year']:.1f} 次。狀態策略的進出次數比均線規則少，成本影響較小。",
+                    '- 1998 年起只有幾次明確的大空頭，統計檢定力有限；結論是「這段歷史上」的結果。',
+                    '- 狀態策略多半能降低最大回撤，但沒有證明能提高夏普值或報酬——少賠的代價是錯過部分反彈。',
+                    '- 這是風險狀態的描述，不是買賣訊號，也不構成投資建議。']))
+
+            with st.expander('狀態成績單（上線後的真實紀錄）'):
+                _sc = statelog.scorecard()
+                if not _sc['total']:
+                    st.info('尚無紀錄。每日排程會把當天的市場狀態與部位建議寫進只能新增的紀錄，20 個交易日後對答案。')
+                else:
+                    st.markdown(f"已記錄 **{_sc['total']}** 筆判斷，已到期 **{_sc['resolved']}** 筆。")
+                    if _sc['regime']:
+                        st.write({SN.get(k, k): f"{v['n']} 筆，之後 20 日平均實現波動 {v['vol']:.0%}" for k, v in _sc['regime']['by_state'].items()})
+                    if _sc['risk']:
+                        st.write(f"部位：實現波動 ÷ 預測波動的中位數 {_sc['risk']['ratio_median']:.2f}，落在 0.5～1.5 倍的比例 {_sc['risk']['within_1x']:.0%}")
+                    if _sc['resolved'] < 30:
+                        st.warning('到期筆數太少（< 30），先不下結論。')
+                    _ok = statelog.verify_logs()
+                    st.caption('紀錄完整性：' + ('✅ 雜湊鏈完整' if all(x[0] for x in _ok) else '❌ 紀錄被改動過'))
+
+    with t_risk:
+        if not RISK or not RISK.get('backtest'):
+            st.info('尚無風險與部位結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            st.caption('波動比漲跌方向好預測，所以這裡把波動預測拿來決定「部位該多大」：預期震盪越大，部位越小，讓每個部位帶來的風險大致相同。這是風險說明，不是買賣建議。')
+            tv = RISK['target_vol']
+            st.markdown('##### 歷史實測：波動目標')
+            st.caption(f"規則：部位 = 目標年化波動 {tv:.0%} ÷ 預測波動（上限 100%，不加槓桿），每週調整，隔天生效，扣成本；波動預測用 EWMA 基準（保守估計）。2004 年起，涵蓋 2008 與 2020。")
+            rrows = []
+            for t_, b_ in RISK['backtest'].items():
+                for k, nm in RISK['strategies'].items():
+                    v = b_['stats'][k]
+                    rrows.append({'指數': b_['name'], '策略': nm, '年化報酬': f"{v['cagr']:.1%}", '夏普值': f"{v['sharpe']:.2f}",
+                                  '最大回撤': f"{v['mdd']:.0%}", '最差單月': f"{b_['worst_month'][k]:.0%}"})
+            st.dataframe(pd.DataFrame(rrows), hide_index=True, width='stretch', height=420)
+            for t_, b_ in RISK['backtest'].items():
+                st.markdown(f"**{b_['name']}**：平均持股 {b_['avg_weight_vt']:.0%}；波動目標的最大回撤比「同樣平均持股的一直持有」"
+                            f"{'小' if b_['q1_beats_scaled'] else '沒有比較小'}（{b_['stats']['vt']['mdd']:.0%} vs {b_['stats']['bh_scaled']['mdd']:.0%}）；"
+                            f"夏普差 {b_['sharpe_diff']:+.2f}（95% 區間 {b_['sharpe_ci'][0]:+.2f} ～ {b_['sharpe_ci'][1]:+.2f}）→ **{'較高' if b_['q2_better_sharpe'] else '未證明較高'}**；"
+                            f"年化報酬差 {b_['ret_diff']:+.1%}。")
+            st.info('讀法：波動目標主要的效果是**壓低回撤與最差單月**，而不是提高報酬。拿「同樣平均持股比例」的一直持有當對照，是為了確認回撤變小不只是因為持股比較少。'
+                    '加上「站上季線才持有」後，夏普值沒有比較好（與趨勢規則實測一致），所以部位大小主要由波動決定，趨勢只當描述。')
+            if VOLIDX and VOLIDX.get('markets'):
+                with st.expander('大盤長歷史波動預測（1998 起，HAR vs EWMA）'):
+                    _rows = []
+                    for _t, _m in VOLIDX['markets'].items():
+                        for _h, _v in _m['results'].items():
+                            _rows.append({'指數': _m['name'], '期間': {'5': '1 週', '10': '2 週', '20': '4 週'}[_h], '樣本外天數': _v['n'],
+                                          'HAR 比最佳基準準': f"{_v['improve']:.0%}", '95% 區間': f"{_v['ci'][0]:+.3f} ～ {_v['ci'][1]:+.3f}",
+                                          '判定': '通過' if _v['beats_baseline'] else '未通過'})
+                    st.dataframe(pd.DataFrame(_rows), hide_index=True, width='stretch')
+                    _ab = (RISK or {}).get('ab_har')
+                    st.caption('25 年資料下簡單 HAR 比 EWMA 準；但拿它決定部位時，實現波動與目標的差距與最大回撤反而較差（' +
+                               ('、'.join(f"{v['name']}回撤 {v['har']['mdd']:.0%} vs {v['ewma']['mdd']:.0%}" for k, v in _ab.items() if k not in ('adopt_all', 'adopt_all_bc')) if _ab else '見 risk.json') +
+                               '），加上對數常態偏誤修正後差距縮小（' + ('、'.join(f"{v['name']}回撤 {v['har_bc']['mdd']:.0%}" for k, v in _ab.items() if k not in ('adopt_all', 'adopt_all_bc') and 'har_bc' in v) if _ab else '') + '），但仍不如 EWMA，依事先規則維持 EWMA。「預測較準」不等於「用於部位較好」。')
+            st.markdown('##### 你的風險預算 → 部位上限')
+            c1, c2 = st.columns(2)
+            budget = c1.slider('一個月最多願意虧掉整個投資組合的比例（壞情況 = 2 倍標準差）', 1.0, 10.0, RISK['loss_budget'] * 100, 0.5, format='%.1f%%', key='risk_budget') / 100
+            tvu = c2.slider('或：目標年化波動', 5, 30, int(tv * 100), 1, format='%d%%', key='risk_tv') / 100
+            rows = []
+            for t_, v in RISK['current'].items():
+                m_sd = v['daily20'] * np.sqrt(20)
+                w_b = min(1.0, budget / (2 * m_sd)) if m_sd > 0 else 1.0
+                w_v = min(1.0, tvu / v['annual20']) if v['annual20'] > 0 else 1.0
+                q_ = v.get('quadrant')
+                rows.append({'標的': core.label(t_) if t_ in core.NAMES else t_, '趨勢 × 波動': q_['name'] if q_ else '—',
+                             '預測年化波動': v['annual20'] * 100, '未來 4 週 ±1σ': m_sd * 100, '部位上限（風險預算）': w_b, '部位上限（目標波動）': w_v})
+            st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch', column_config={
+                '預測年化波動': st.column_config.NumberColumn(format='%.0f%%', help='模型預測未來 4 週的年化波動'),
+                '未來 4 週 ±1σ': st.column_config.NumberColumn(format='±%.1f%%', help='未來 4 週漲跌的一個標準差，約 2/3 的情況落在這個範圍內'),
+                '部位上限（風險預算）': st.column_config.ProgressColumn(format='percent', min_value=0, max_value=1),
+                '部位上限（目標波動）': st.column_config.ProgressColumn(format='percent', min_value=0, max_value=1)})
+            st.caption('部位上限 = 這檔占整個投資組合的最大比例。例：預測一個月 ±8%，預算 3% → 上限 3% ÷ (2×8%) ≈ 19%。'
+                       '波動預測的歷史驗證顯示，實際漲跌落在 1 倍範圍約 6 成、2 倍範圍約 9 成，略窄於常態分布，所以保守起見用 2 倍。這是風險計算，不是建議買進。')
+            with st.expander('四格框架：趨勢 × 波動'):
+                for k, (nm, tx) in risk.QUADRANTS.items():
+                    st.markdown(f"- **{nm}**：{tx}")
+
 
 # ═════════════════════════ 新聞 ═════════════════════════
 with tab_news:
@@ -867,8 +1046,8 @@ with tab_model:
                 st.markdown(chr(10).join([
                     '- 這幾年股市大多在漲，所以「永遠猜漲」本身就有 56%～65% 的命中率，是很難超越的基準。',
                     '- 只用價量、美股隔夜、匯率，資訊量有限；短期漲跌多半是隨機的，沒勝過基準是常見且誠實的結果。',
-                    '- 樣本只有約 5 年，相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
-                    '- 還沒納入法人買賣超（證交所沒有歷史資料，需要先每天累積）與新聞情緒，是後續改進方向。',
+                    '- 樣本約 15 年（2010 年起，驗證從 2016 年起），相鄰日期的結果高度重疊，真正獨立的樣本比表上的數字少很多。',
+                    '- 法人買賣超只有 2023 年起的資料，A/B 驗證後沒有採用；新聞情緒目前沒有訊號。',
                     '- 模型採保守設定（淺樹、強正則化），並試過三種複雜度皆未勝過基準；沒有再針對驗證期反覆調參。']))
 
     with t_sim:
