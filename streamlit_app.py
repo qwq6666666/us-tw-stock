@@ -20,6 +20,7 @@ import fundamentals
 import model as probmodel
 import outlook
 import scorecard
+import volmodel
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide', initial_sidebar_state='collapsed')
 
@@ -145,6 +146,7 @@ NEWS = get_news(_mtime(core.NEWS_CSV))
 SUMMARY = open(core.SUMMARY_MD, encoding='utf-8').read() if os.path.exists(core.SUMMARY_MD) else ''
 FUND = fundamentals.load()
 PROB = probmodel.load()
+VOL = volmodel.load()
 
 # 標的清單：台股個股 → 美股個股 → 指數
 ORDER = ([t for t in M.tw_cols if not t.startswith('^')] + [t for t in M.us_cols if not t.startswith('^')]
@@ -291,10 +293,12 @@ with tab_stock:
             pills.append(f"<span class='pill'>體質 {fd['total']:.0f} 分（{fd['grade']}）</span>")
         if pr:
             pills.append(f"<span class='pill'>1 週上漲機率 {pr['prob']:.0%}（參考）</span>")
+    if t and VOL and VOL.get('predictions', {}).get(t, {}).get('5'):
+        pills.append(f"<span class='pill'>波動{volmodel.level_word(VOL['predictions'][t]['5']['pct'])}</span>")
     st.markdown(f"<div class='hero'><div class='n'>{name}</div><div class='p'>{last:,.2f} {chg_html(ch)}</div>"
                 f"<div>{''.join(pills)}</div><div class='note'>資料至 {s.index[-1]:%Y-%m-%d}</div></div>", unsafe_allow_html=True)
 
-    t_chart, t_fund, t_prob, t_news = st.tabs(['走勢', '公司體質', '漲跌機率', '相關新聞'])
+    t_chart, t_vol, t_fund, t_prob, t_news = st.tabs(['走勢', '波動預測', '公司體質', '漲跌機率', '相關新聞'])
 
     with t_chart:
         rng = st.segmented_control('期間', ['3 個月', '6 個月', '1 年', '全部'], default='1 年', key='rng')
@@ -303,6 +307,52 @@ with tab_stock:
         show(price_chart(s, name, days))
         with st.expander('名詞說明'):
             st.markdown(core.GLOSSARY, unsafe_allow_html=True)
+
+    with t_vol:
+        vp = (VOL or {}).get('predictions', {}).get(t) if t else None
+        if t is None:
+            st.info('其他代號只提供走勢；波動預測僅限關注清單內的標的。')
+        elif not vp:
+            st.info('尚無這檔的波動預測。')
+        else:
+            mk = next(iter(vp.values()))['market']
+            st.caption('這裡預測的是「接下來漲跌的幅度大概多大」，**不是**會漲還是會跌。用途是估風險：波動越大，同樣金額可能的賺賠都越大。')
+            cols = st.columns(len(vp))
+            for col, (h, p) in zip(cols, sorted(vp.items(), key=lambda kv: int(kv[0]))):
+                v_ = ((VOL.get('validation') or {}).get(mk) or {}).get(h) or {}
+                with col.container(border=True):
+                    st.markdown(f"**未來 {VOL['horizons'][h]}**（{h} 個交易日）的漲跌，大多落在")
+                    st.markdown(f"<div style='font-size:1.8rem;font-weight:800;line-height:1.3'>±{p['range']:.1%}</div>"
+                                f"<div class='note'>約 {p['close'] * (1 - p['range']):,.2f} ～ {p['close'] * (1 + p['range']):,.2f}</div>"
+                                f"<span class='pill'>波動{volmodel.level_word(p['pct'])}</span>", unsafe_allow_html=True)
+                    if v_:
+                        st.caption(f"歷史驗證中，實際漲跌有 {v_['cover1']:.0%} 落在這個範圍內、{v_['cover2']:.0%} 落在 2 倍範圍內。")
+                        if v_.get('beats_baseline'):
+                            st.caption(f"✅ 通過嚴格驗證：比簡單公式準 {v_['improve']:.0%}")
+                        elif v_.get('has_skill'):
+                            st.caption(f"◯ 有預測力（比只猜長期平均準 {v_['skill_vs_mean']:.0%}），但未證明優於簡單公式")
+                        else:
+                            st.caption('△ 預測力未獲證明，僅供參考')
+            p5 = vp.get('5') or next(iter(vp.values()))
+            lvl = '' if p5['pct'] is None else f"預測的波動高於這檔近三年 {p5['pct']:.0%} 的時候（{volmodel.level_word(p5['pct'])}）。"
+            st.markdown(f"資料截至 **{p5['as_of']}** 收盤。近 5 日每天平均震 **{p5['recent5']:.1%}**、近一個月 **{p5['recent22']:.1%}**；"
+                        f"模型預估未來 1 週每天約 **{p5['daily']:.1%}**。{lvl}")
+            lr_ = np.log(s).diff()
+            hv = (np.sqrt((lr_ ** 2).rolling(22).mean()) * np.sqrt(core.TRADING_DAYS)).dropna().tail(500)
+            fig = go.Figure(go.Scatter(x=hv.index, y=hv, name='過去 22 日實際波動（年化）', line=dict(color='#3b6fe0', width=1.6)))
+            p20 = vp.get('20') or p5
+            fig.add_hline(y=p20['annual'], line_dash='dash', line_color='#f5a623',
+                          annotation_text=f"模型預估未來 4 週 {p20['annual']:.0%}", annotation_position='bottom right')
+            fig.update_layout(title='波動的變化（年化，數字越大代表漲跌越劇烈）', height=340, yaxis_tickformat='.0%',
+                              margin=dict(l=10, r=10, t=50, b=10), showlegend=False)
+            show(fig)
+            with st.expander('怎麼讀？限制是什麼？'):
+                st.markdown(chr(10).join([
+                    '- 「±3.9%」的意思是：依模型估計，這段期間結束時的漲跌幅，大多數情況會落在正負這個數字以內。實際落在範圍內的比例寫在每張卡片上（不是保證）。',
+                    '- 股市偶爾會出現遠超過範圍的大漲大跌（例如重大消息），模型抓不到這種突發事件。',
+                    '- 波動有延續性：最近震得大，接下來通常也震得大，這是模型主要的依據。它完全不判斷方向。',
+                    '- 只用每日收盤價，沒有盤中高低點，所以對當天盤中的劇烈震盪不敏感。',
+                    '- 模型好壞的驗證與上線後的真實成績，請看「🧪 模型」。']))
 
     with t_fund:
         d = fund_of(t) if t else None
@@ -464,6 +514,7 @@ with tab_model:
     t_score, t_valid, t_sim = st.tabs(['成績單（上線後的真實成績）', '歷史驗證（回測）', '新聞前景模擬'])
 
     with t_score:
+        st.markdown('##### 漲跌方向成績單')
         LOGDF = scorecard.evaluate(M.close_all)
         ok, n_log, bad = scorecard.verify_log()
         ok_r, n_res, bad_r = scorecard.verify_results()
@@ -538,7 +589,58 @@ with tab_model:
                     '- 模型每次更新都用「截至當天所有已知結果」重新訓練（沒有偷看未來）。',
                     '- 同一天不同標的的結果高度相關、相鄰日期也重疊，實際獨立的樣本比筆數少，結論要更保守。']))
 
+        st.divider()
+        st.markdown('##### 波動預測成績單')
+        (okl, nl, bl), (okr, nr, br) = volmodel.verify_logs()
+        VDF, VS = volmodel.scorecard()
+        if not VS['total']:
+            st.info('波動預測還沒有紀錄。每日更新跑過一次之後就會開始記錄。')
+        else:
+            c1, c2, c3 = st.columns(3)
+            c1.metric('累計預測', f"{VS['total']} 筆")
+            c2.metric('已到期對答案', f"{VS['resolved']} 筆")
+            c3.metric('紀錄完整性', '✅ 完整' if okl and okr else '⚠️ 異常', f'預測 {nl}・結果 {nr} 筆已驗證' if okl and okr else '紀錄被改動或損毀', delta_color='off')
+            if not (okl and okr):
+                st.error('波動預測紀錄的防竄改雜湊鏈不一致，下列成績不可信。')
+            if VS['resolved'] < 30:
+                st.warning(f"目前只有 {VS['resolved']} 筆到期，樣本太少，請不要據此下結論。")
+            st.caption('每筆預測當下同時記下簡單公式（EWMA）的預測，到期後比誰的誤差小；並統計實際漲跌落在預測範圍內的比例。')
+            st.dataframe(pd.DataFrame([{
+                '期間': r['label'], '已到期筆數': r['n'],
+                '誤差（模型）': f"{r['err_model']:.4f}" if r['n'] else '—', '誤差（EWMA）': f"{r['err_base']:.4f}" if r['n'] else '—',
+                '落在 1 倍範圍內': f"{r['cover1']:.0%}" if r['n'] else '—', '落在 2 倍範圍內': f"{r['cover2']:.0%}" if r['n'] else '—'}
+                for r in VS['rows']]), hide_index=True, width='stretch')
+
     with t_valid:
+        st.markdown('##### 波動預測模型（預測震盪幅度，不預測方向）')
+        if not VOL or not VOL.get('validation'):
+            st.info('尚無波動模型結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            vall = [(mk, h, r) for mk in ('tw', 'us') for h, r in sorted((VOL['validation'].get(mk) or {}).items(), key=lambda kv: int(kv[0])) if r]
+            n_pass = sum(1 for _, _, r in vall if r['beats_baseline'])
+            n_skill = sum(1 for _, _, r in vall if r.get('has_skill'))
+            st.success(f'**波動可以預測。** {len(vall)} 組驗證中，有 {n_skill} 組明顯比「只猜長期平均」準；'
+                       f'其中 {n_pass} 組進一步通過較嚴格的標準：明顯比常用的簡單公式（EWMA）更準。沒通過嚴格標準的組別，模型的誤差仍低於簡單公式，只是差距還不足以排除運氣。')
+            st.caption('誤差 = 預測與實際波動（取對數）的均方誤差，越低越好。「明顯」的定義：以日期為單位做區塊拔靴法，95% 信賴區間不含 0（相鄰日期的答案高度重疊，一般的檢定會高估把握）。'
+                       '排序相關：預測高的時候實際是否也高，1 為完全一致、0 為無關。')
+            names_ = {'har': 'HAR 線性', 'lgb': 'LightGBM'}
+            st.dataframe(pd.DataFrame([{
+                '市場': '台股' if mk == 'tw' else '美股', '期間': VOL['horizons'][h], '採用模型': names_[r['model']], '驗證樣本': r['n'],
+                '誤差（模型）': f"{r['mse'][r['model']]:.4f}", '誤差（EWMA）': f"{r['mse']['ewma']:.4f}", '誤差（長期平均）': f"{r['mse']['mean']:.4f}",
+                '比最佳簡單公式準': f"{r['improve']:+.1%}", '嚴格標準': '✅ 通過' if r['beats_baseline'] else '未通過',
+                '比長期平均準': f"{r['skill_vs_mean']:+.1%}" + ('（明顯）' if r.get('has_skill') else ''),
+                '排序相關': f"{r['rank_corr']:.2f}", '範圍涵蓋率（1 倍／2 倍）': f"{r['cover1']:.0%}／{r['cover2']:.0%}"} for mk, h, r in vall]),
+                hide_index=True, width='stretch')
+            with st.expander('這個模型怎麼做的？規則是什麼？'):
+                st.markdown(chr(10).join([
+                    '- 預測目標：未來 1／2／4 週的實現波動（每日報酬平方的平均再開根號）。',
+                    '- 候選模型事先固定兩個：HAR（用近 1／5／22／66 日波動的線性模型，波動預測的經典做法）與 LightGBM（另加報酬、回撤、大盤與美股波動等）。每個市場選平均誤差較低的；LightGBM 沒有比較好就用較簡單的 HAR。',
+                    '- 驗證按時間切分，訓練與驗證之間隔開預測天數；台股用到的美股資料一律嚴格早於當日。',
+                    '- 嚴格標準（看結果前訂好）：誤差要明顯低於 EWMA 與「延續過去同樣天數的波動」兩個簡單公式中較好的那個。',
+                    '- 「比長期平均準」是看到第一次結果後才補上的描述性數字，用來回答「波動到底能不能預測」，不影響嚴格標準的判定。',
+                    '- 範圍涵蓋率若低於 68%／95%，代表模型給的範圍略窄（股市大漲大跌的頻率比常態分布高），網頁上顯示的是實際涵蓋率。']))
+        st.divider()
+        st.markdown('##### 漲跌方向模型')
         if not PROB or not PROB.get('predictions'):
             st.info('尚無模型結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
         else:
