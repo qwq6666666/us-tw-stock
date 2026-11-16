@@ -66,6 +66,26 @@ def download_close(tickers, start=START):
     return close.dropna(how='all').dropna(axis=1, how='all')
 
 
+def drop_unfinished(close, now=None):
+    """排程若在盤中執行，Yahoo 會把「盤中價」當成當天收盤價。這裡把尚未收盤的當日價格丟掉，避免用半天的資料做判斷。
+    台股以 14:00（台北）、美股以 16:30（紐約）為界。回傳（處理後的表格, 被丟掉的說明清單）。"""
+    now = now or pd.Timestamp.now(tz='Asia/Taipei')
+    close, dropped = close.copy(), []
+    if close.empty:
+        return close, dropped
+    last = close.index[-1].date()
+    tw = [c for c in close.columns if c in TW_COLS]
+    us = [c for c in close.columns if c in US_COLS]
+    if tw and last == now.date() and (now.hour, now.minute) < (14, 0) and close.loc[close.index[-1], tw].notna().any():
+        close.loc[close.index[-1], tw] = np.nan
+        dropped.append(f'台股 {last} 盤中價')
+    ny = now.tz_convert('America/New_York')
+    if us and last == ny.date() and (ny.hour, ny.minute) < (16, 30) and close.loc[close.index[-1], us].notna().any():
+        close.loc[close.index[-1], us] = np.nan
+        dropped.append(f'美股 {last} 盤中價')
+    return close.dropna(how='all'), dropped
+
+
 def rsi(s, n=14):
     d = s.diff()
     up = d.clip(lower=0).ewm(alpha=1 / n, adjust=False).mean()

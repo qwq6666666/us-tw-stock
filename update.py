@@ -11,6 +11,7 @@ import institutional
 import model
 import outlook
 import scorecard
+import volmodel
 
 
 def main():
@@ -31,11 +32,14 @@ def main():
         print('行情下載失敗，保留前一次的資料。')
         sys.exit(1)
 
+    close, unfinished = core.drop_unfinished(close)      # 盤中執行時，不採用尚未收盤的當日價格
     missing = [t for t in tickers if t not in close.columns]
     close.to_csv(core.PRICES_CSV, encoding='utf-8-sig')
     market = core.Market(close)
 
     news, status = core.fetch_all_news()
+    if unfinished:
+        status.append('已略過尚未收盤的價格：' + '、'.join(unfinished))
     archive = core.update_archive(news)
 
     try:                                          # 公司體質：失敗時保留前一次的檔案，不影響其他更新
@@ -61,6 +65,15 @@ def main():
         status += ['漲跌機率模型：' + x for x in mres['status']]
     except Exception as e:
         status.append(f'漲跌機率模型：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
+    try:                                          # 波動預測：模型、只能新增的預測紀錄、到期結果；失敗時保留前一次的檔案
+        vres = volmodel.build_all(market)
+        volmodel.save(vres)
+        v_new, v_done = volmodel.append_predictions(vres), volmodel.resolve_new(market.close_all)
+        status += ['波動預測：' + x for x in vres['status']]
+        status.append(f'波動成績單：新增 {v_new} 筆預測、{v_done} 筆到期結果')
+    except Exception as e:
+        status.append(f'波動預測：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
     try:                                          # 新聞前景模擬：用歷史新聞做不偷看未來的滾動模擬；失敗時保留前一次的檔案
         ores = outlook.build_all(market.close_all)
