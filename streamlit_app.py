@@ -20,7 +20,9 @@ import fundamentals
 import model as probmodel
 import outlook
 import scorecard
+import relstrength
 import trend
+import universe
 import volmodel
 
 st.set_page_config(page_title='美股 × 台股 整合分析', page_icon='📈', layout='wide', initial_sidebar_state='collapsed')
@@ -149,7 +151,15 @@ FUND = fundamentals.load()
 PROB = probmodel.load()
 VOL = volmodel.load()
 TR = trend.load()
+REL = relstrength.load()
 
+
+@st.cache_data(show_spinner=False)
+def get_uni(mtime):
+    return universe.load()
+
+
+UNI = get_uni(_mtime(universe.PATHS['volume']))
 # 標的清單：台股個股 → 美股個股 → 指數
 ORDER = ([t for t in M.tw_cols if not t.startswith('^')] + [t for t in M.us_cols if not t.startswith('^')]
          + [t for t in M.tw_cols + M.us_cols if t.startswith('^')])
@@ -315,6 +325,16 @@ with tab_stock:
             st.caption(f"趨勢強度：近 60 個交易日漲跌 {cur_tr['ret60']:+.1%}，相當於這檔平常波動的 {cur_tr['z60']:+.1f} 倍 → {cur_tr['word']}。"
                        '這是把漲跌幅除以波動後的尺度，方便不同股票互相比較；它描述現況，實測顯示對之後的漲跌沒有可靠的預示力（見「🌐 市場 → 趨勢規則實測」）。')
         show(price_chart(s, name, days))
+        vd = UNI.get('volume') if UNI else None
+        if t and vd is not None and t in vd.columns and not t.startswith('^'):
+            vv = vd[t].dropna().tail(120)
+            if len(vv) > 60:
+                vr = vd[t].dropna().tail(20).mean() / vd[t].dropna().tail(60).mean()
+                fv = go.Figure(go.Bar(x=vv.index, y=vv, marker_color='#8a8f98'))
+                fv.add_trace(go.Scatter(x=vv.index, y=vv.rolling(20).mean(), name='20 日均量', line=dict(color='#f5a623', width=1.6)))
+                fv.update_layout(title='成交量（近 120 個交易日）', height=240, margin=dict(l=10, r=10, t=40, b=10), showlegend=False)
+                show(fv)
+                st.caption(f"量能比（近 20 日均量 ÷ 近 60 日均量）：**{vr:.2f}**。大於 1 代表最近交易比較熱絡，小於 1 代表比較冷清；它描述關注度，不預測漲跌。")
         with st.expander('名詞說明'):
             st.markdown(core.GLOSSARY, unsafe_allow_html=True)
 
@@ -444,7 +464,7 @@ with tab_stock:
 
 # ═════════════════════════ 市場 ═════════════════════════
 with tab_market:
-    t_perf, t_link, t_adr, t_rule = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價', '趨勢規則實測'])
+    t_perf, t_link, t_adr, t_rule, t_rel = st.tabs(['績效比較', '美股 → 台股連動', 'ADR 溢價', '趨勢規則實測', '相對強弱'])
 
     with t_perf:
         options = M.sel_us + M.sel_tw
@@ -582,6 +602,74 @@ with tab_market:
                         '- 信賴區間用區塊拔靴法（考慮相鄰日期的相關性）。最大回撤只有一條歷史路徑，所以只能描述、無法檢定。',
                         '- **最大的限制是期間**：2021 年底到現在，雖然包含 2022 年的下跌，但整體是大多頭。趨勢規則的價值主要出現在長時間的空頭（例如 2000、2008 年那種），這段資料檢驗不到。',
                         '- 所以這個結果的正確讀法是：「在這五年，照趨勢規則做並沒有比較好」，而不是「趨勢規則永遠沒用」。']))
+
+    with t_rel:
+        if not REL or not REL.get('markets'):
+            st.info('尚無相對強弱結果。請到 GitHub 專案的 Actions 頁面手動執行一次「每日更新」。')
+        else:
+            st.caption('這裡不問「會不會漲」，而是問「在一群股票裡，過去相對強的，之後一個月是不是也相對強？」。規則與判準在看結果前固定，沒有調參數。')
+            mkr = 'tw' if st.radio('市場', ['台股', '美股'], horizontal=True, key='rel_mk') == '台股' else 'us'
+            R_ = REL['markets'].get(mkr)
+            if not R_:
+                st.info('這個市場的資料不足。')
+            else:
+                P_ = R_['results'].get(REL['primary'])
+                bias = R_.get('bias')
+                if P_ and P_['has_evidence']:
+                    st.success(f"**有證據：** 過去 12 個月（跳過最近 1 個月）表現較強的股票，之後一個月傾向也較強（IC {P_['ic_mean']:+.3f}，95% 區間不含 0）。但名單有存活者偏誤，請打折看。")
+                elif P_:
+                    st.warning(f"**沒有足夠證據：** 動能排名與之後一個月報酬的相關（IC）平均 {P_['ic_mean']:+.3f}，方向是正的，"
+                               f"{P_['ic_pos_rate']:.0%} 的月份為正，但 95% 信賴區間 {P_['ic_ci'][0]:+.3f}～{P_['ic_ci'][1]:+.3f} 含 0，不能排除是運氣。")
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric('股票數', f"{R_['n_stocks']} 檔")
+                if P_:
+                    c2.metric('驗證月份', f"{P_['months']} 個月", f"{P_['from']} ～ {P_['to']}", delta_color='off')
+                    c3.metric('前 20% 每月平均', f"{P_['top_mean']:+.2%}", f"後 20% {P_['bottom_mean']:+.2%}", delta_color='off')
+                    c4.metric('平均每月換手', f"{P_['turnover']:.0%}", '前 20% 名單的更換比例', delta_color='off')
+                if bias:
+                    with st.container(border=True):
+                        st.markdown('**⚠️ 存活者偏誤：先看這個**')
+                        st.markdown(f"名單是「現在的」大型股。同一段期間，名單等權重年化報酬 **{bias['universe']:.1%}**，大盤指數 **{bias['index']:.1%}**，"
+                                    f"名單多賺 **{bias['gap']:.1%}**。這個差距的一部分來自「現在是大型股的公司，過去多半表現好」，所以「強者恆強」會被高估，下面的數字都要往保守的方向修正。")
+                if P_:
+                    nm_ = REL['signals']
+                    st.markdown('##### 各訊號的結果')
+                    st.caption('IC = 每月「分數高低」與「之後報酬高低」的排名相關，0 = 無關，越高越好。除主要訊號外，其餘只當參考（同時看多個，容易碰巧有一個好看）。')
+                    st.dataframe(pd.DataFrame([{
+                        '訊號': nm_[k] + ('（判定用）' if k == REL['primary'] else ''), '月數': r['months'], '平均 IC': f"{r['ic_mean']:+.3f}",
+                        'IC 的 95% 區間': f"{r['ic_ci'][0]:+.3f} ～ {r['ic_ci'][1]:+.3f}", 'IC 為正的月份': f"{r['ic_pos_rate']:.0%}",
+                        '前 20% − 後 20%（每月）': f"{r['spread_mean']:+.2%}", '前 20% − 全體（每月）': f"{r['excess_mean']:+.2%}",
+                        '換手': f"{r['turnover']:.0%}", '判定': '有證據' if r['has_evidence'] else '沒有證據'} for k, r in R_['results'].items()]),
+                        hide_index=True, width='stretch')
+                cv = R_.get('curve')
+                if cv:
+                    fig = go.Figure()
+                    for key, nm, col in (('top', '動能最強的 20%', '#e5484d'), ('all', '全體平均', '#8a8f98'), ('bottom', '動能最弱的 20%', '#2f9e6b')):
+                        fig.add_trace(go.Scatter(x=cv['dates'], y=cv[key], name=nm, line=dict(color=col, width=2)))
+                    fig.update_layout(title='每月依動能排名持有的累積淨值（起點 = 1，未扣交易成本）', height=380, hovermode='x unified',
+                                      margin=dict(l=10, r=10, t=50, b=10), legend=dict(orientation='h', y=-0.15))
+                    show(fig)
+                    st.caption('這張圖的差距包含存活者偏誤與未扣成本；換手越高，成本影響越大。')
+                cur = R_['current']
+                st.markdown(f"##### 目前的排名（資料至 {cur['as_of']}）")
+                st.caption('依 12-1 動能由強到弱。第 1 組 = 最強的 20%。這是描述「過去誰比較強」，不是推薦。')
+                st.dataframe(pd.DataFrame([{
+                    '排名': r['rank'], '標的': core.label(r['ticker']) if r['ticker'] in core.NAMES else f"{r['name']} ({r['ticker']})",
+                    '組別': f"第 {r['quintile']} 組", '12-1 動能': r['score'] * 100, '近 1 月': None if r['ret1m'] is None else r['ret1m'] * 100,
+                    '近 3 月': None if r['ret3m'] is None else r['ret3m'] * 100, '趨勢強度': r['z60'], '量能比': r['vol_ratio']} for r in cur['rows']]),
+                    hide_index=True, width='stretch', height=520, column_config={
+                        '12-1 動能': st.column_config.NumberColumn(format='%+.0f%%'), '近 1 月': st.column_config.NumberColumn(format='%+.1f%%'),
+                        '近 3 月': st.column_config.NumberColumn(format='%+.1f%%'),
+                        '趨勢強度': st.column_config.NumberColumn(format='%+.1f', help='近 60 日漲跌相當於平常波動的幾倍'),
+                        '量能比': st.column_config.NumberColumn(format='%.2f', help='近 20 日平均成交量 ÷ 近 60 日平均成交量；大於 1 代表最近比較熱絡')})
+                with st.expander('怎麼做的？限制是什麼？'):
+                    st.markdown(chr(10).join([
+                        '- 訊號：12-1 動能 = 前 12 個月報酬，跳過最近 1 個月（避開短期反轉），是學術文獻中最標準的定義。',
+                        '- 每個月最後一個交易日排名，答案是下一個月底的報酬；只用當天已知的資料。各市場分開排名。',
+                        '- 判準（事先訂好）：每月 IC 的平均大於 0，且以月為單位的區塊拔靴法 95% 區間下界大於 0。月數只有約 57 個，統計檢定力有限，沒有證據不等於沒有效果。',
+                        '- 台股池不含 ETF，美股池不含 ADR（避免與台股重複）。名單固定、不是即時成分股；個別代號歷史不足會被略過。',
+                        '- **存活者偏誤是最大的限制**，見上方方框；因此「沒有證據」可信，「有證據」則要打折。',
+                        '- 成交量已一併存下來，目前只用在「量能比」這個描述欄位，沒有放進任何預測。']))
 
 # ═════════════════════════ 新聞 ═════════════════════════
 with tab_news:
@@ -729,6 +817,14 @@ with tab_model:
                     '- 嚴格標準（看結果前訂好）：誤差要明顯低於 EWMA 與「延續過去同樣天數的波動」兩個簡單公式中較好的那個。',
                     '- 「比長期平均準」是看到第一次結果後才補上的描述性數字，用來回答「波動到底能不能預測」，不影響嚴格標準的判定。',
                     '- 範圍涵蓋率若低於 68%／95%，代表模型給的範圍略窄（股市大漲大跌的頻率比常態分布高），網頁上顯示的是實際涵蓋率。']))
+            rab = (VOL or {}).get('range_ab')
+            if rab:
+                st.markdown('##### 加入「每日最高／最低價」有沒有讓波動預測更準？（A/B 驗證）')
+                st.caption('特徵：Parkinson 範圍波動（用每日最高與最低價估計當天震盪幅度，比只看收盤價更完整）。規則事先訂好：同一套驗證期與參數，三個期間的平均誤差較低才採用。')
+                st.dataframe(pd.DataFrame([{'市場': '台股' if mk == 'tw' else '美股', '平均誤差（只用收盤價）': f"{x['mse_without']:.4f}",
+                                            '平均誤差（加高低價）': f"{x['mse_with']:.4f}", '改善': f"{1 - x['mse_with'] / x['mse_without']:+.1%}",
+                                            '結果': '採用' if x['used'] else '不採用'} for mk, x in rab.items()]), hide_index=True, width='stretch')
+                st.caption('改善幅度不大，但兩個市場方向一致。')
         st.divider()
         st.markdown('##### 漲跌方向模型')
         if not PROB or not PROB.get('predictions'):

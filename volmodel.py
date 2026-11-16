@@ -16,6 +16,8 @@
   3. 「勝過基準」的定義：誤差（對數波動的均方誤差）低於 EWMA 與延續兩者中較好的那個，
      且以日期為單位的區塊拔靴法（block bootstrap）95% 信賴區間下界 > 0。相鄰日期的答案高度重疊，所以不能用一般的顯著性檢定。
   4. 只有勝過基準的（市場, 期間）才會顯示在網頁總覽。
+  5. 高低價特徵（Parkinson 範圍波動，用每日最高／最低價）的 A/B：同一套驗證期與參數，三個期間的平均誤差（取該市場採用的模型）
+     較低才採用，否則維持只用收盤價。規則在看結果前訂好。
 """
 import json
 import os
@@ -38,6 +40,7 @@ HORIZONS = {5: '1 週', 10: '2 週', 20: '4 週'}
 FOLD_STARTS = ['2024-01-01', '2024-07-01', '2025-01-01', '2025-07-01', '2026-01-01']
 FLOOR = 5e-4                       # 每日波動下限（避免對 0 取對數）
 HAR_COLS = ['lv1', 'lv5', 'lv22', 'lv66', 'lmean']
+RANGE_COLS = ['lpk5', 'lpk22']                     # Parkinson 範圍波動（用最高／最低價），選用
 EXTRA_COLS = ['lv10', 'lewma', 'down22', 'ret5', 'ret20', 'dd', 'mkt_lv22', 'us_lv5', 'us_abs1', 'fx_lv20']
 ALL_COLS = HAR_COLS + EXTRA_COLS
 LGB_PARAMS = dict(n_estimators=200, learning_rate=0.03, num_leaves=7, min_child_samples=100, subsample=0.8,
@@ -70,7 +73,13 @@ def own_features(s):
     return f, r
 
 
-def market_features(m, market):
+def range_features(high, low):
+    """Parkinson 範圍波動：sqrt(平均((ln(最高/最低))² / (4 ln2)))，取對數。只用到當日為止的高低價。"""
+    pk = np.log(high / low) ** 2 / (4 * np.log(2))
+    return pd.DataFrame({'lpk5': _lg(np.sqrt(pk.rolling(5).mean())), 'lpk22': _lg(np.sqrt(pk.rolling(22).mean()))})
+
+
+def market_features(m, market, hl=None):
     """回傳 {標的: (收盤價, 特徵表, 每日對數報酬)}。"""
     if market == 'tw':
         idx, closes, cols, mkt = m.tw_close.index, m.tw_close, m.tw_cols, '^TWII'
@@ -92,7 +101,12 @@ def market_features(m, market):
         if len(s) < 300:
             continue
         f, r = own_features(s)
-        out[t] = (s, f.join(com.reindex(s.index))[ALL_COLS], r)
+        f = f.join(com.reindex(s.index))[ALL_COLS]
+        if hl is not None and t in hl['high'].columns and t in hl['low'].columns:
+            f = f.join(range_features(hl['high'][t].reindex(s.index), hl['low'][t].reindex(s.index)))
+        else:
+            f[RANGE_COLS] = np.nan
+        out[t] = (s, f, r)
     return out
 
 
@@ -108,17 +122,22 @@ def build_dataset(feats, h):
     return pd.concat(rows)
 
 
-def _fit_predict(tr, te, kind):
+def _cols(kind, use_range):
+    return (HAR_COLS if kind == 'har' else ALL_COLS) + (RANGE_COLS if use_range else [])
+
+
+def _fit_predict(tr, te, kind, use_range=False):
+    cols = _cols(kind, use_range)
     if kind == 'har':
         from sklearn.linear_model import LinearRegression
-        return LinearRegression().fit(tr[HAR_COLS], tr['y']).predict(te[HAR_COLS])
+        return LinearRegression().fit(tr[cols], tr['y']).predict(te[cols])
     import lightgbm as lgb
-    return lgb.LGBMRegressor(**LGB_PARAMS).fit(tr[ALL_COLS], tr['y']).predict(te[ALL_COLS])
+    return lgb.LGBMRegressor(**LGB_PARAMS).fit(tr[cols], tr['y']).predict(te[cols])
 
 
-def walk_forward(ds, h):
+def walk_forward(ds, h, use_range=False):
     """按時間切分：回傳逐筆的樣本外預測表（har、lgb 與各基準），沒有足夠資料時回傳 None。"""
-    d = ds.dropna(subset=ALL_COLS + ['y', 'persist'])
+    d = ds.dropna(subset=ALL_COLS + (RANGE_COLS if use_range else []) + ['y', 'persist'])
     starts = [pd.Timestamp(x) for x in FOLD_STARTS]
     ends = starts[1:] + [d.index.max() + pd.Timedelta(days=1)]
     outs = []
@@ -129,8 +148,8 @@ def walk_forward(ds, h):
             continue
         o = te[['ticker', 'y', 'ret', 'persist']].copy()
         o['ewma'], o['mean'] = te['lewma'], te['lmean']
-        o['har'] = _fit_predict(tr, te, 'har')
-        o['lgb'] = _fit_predict(tr, te, 'lgb')
+        o['har'] = _fit_predict(tr, te, 'har', use_range)
+        o['lgb'] = _fit_predict(tr, te, 'lgb', use_range)
         outs.append(o)
     return pd.concat(outs) if outs else None
 
@@ -171,20 +190,21 @@ def evaluate_oof(o, h, model):
     return res
 
 
-def predict_latest(ds, feats, h, model):
+def predict_latest(ds, feats, h, model, use_range=False):
     """用全部已知答案訓練，預測每檔標的最新一天之後 h 日的波動。"""
-    d = ds.dropna(subset=ALL_COLS + ['y'])
+    need = ALL_COLS + (RANGE_COLS if use_range else [])
+    d = ds.dropna(subset=need + ['y'])
     out = {}
     latest = []
     for t, (s, f, r) in feats.items():
-        x = f.dropna()
+        x = f[need].dropna()
         if x.empty or x.index[-1] != s.index[-1]:
             continue
         latest.append((t, s, r, x.iloc[[-1]]))
     if not latest:
         return out
     X = pd.concat([x for _, _, _, x in latest])
-    pred = _fit_predict(d, X, model)
+    pred = _fit_predict(d, X, model, use_range)
     for (t, s, r, x), p in zip(latest, pred):
         daily = float(np.exp(p))
         hist = _rv(r, h).dropna().tail(756)                    # 這檔標的近三年、同樣長度的實現波動分布
@@ -202,24 +222,40 @@ def level_word(pct):
     return '平靜' if pct < 0.25 else '正常' if pct < 0.75 else '偏高' if pct < 0.90 else '劇烈'
 
 
-def build_all(m):
+def build_all(m, hl=None):
+    """hl：universe.load() 的結果（含 high、low），可為 None。有的話對每個市場做高低價特徵的 A/B，依事先固定的規則決定是否採用。"""
     res = {'updated_at': pd.Timestamp.now(tz='Asia/Taipei').strftime('%Y-%m-%d %H:%M'), 'model_ver': MODEL_VER,
-           'horizons': {str(h): n for h, n in HORIZONS.items()}, 'validation': {}, 'chosen': {}, 'predictions': {}, 'status': []}
+           'horizons': {str(h): n for h, n in HORIZONS.items()}, 'validation': {}, 'chosen': {}, 'predictions': {}, 'status': [],
+           'range_ab': {}}
     for market, mname in (('tw', '台股'), ('us', '美股')):
-        feats = market_features(m, market)
+        feats = market_features(m, market, hl)
         dsets = {h: build_dataset(feats, h) for h in HORIZONS}
-        oofs = {h: walk_forward(dsets[h], h) for h in HORIZONS}
-        ok = [h for h in HORIZONS if oofs[h] is not None]
-        avg = lambda k: float(np.mean([((oofs[h][k] - oofs[h]['y']) ** 2).mean() for h in ok])) if ok else np.inf
-        model = 'lgb' if avg('lgb') < avg('har') else 'har'       # 規則 2：LGBM 沒有比較好就用較簡單的 HAR
-        res['chosen'][market] = {'model': model, 'mse_har': avg('har'), 'mse_lgb': avg('lgb')}
+
+        def run(use_range):
+            oofs = {h: walk_forward(dsets[h], h, use_range) for h in HORIZONS}
+            ok = [h for h in HORIZONS if oofs[h] is not None]
+            avg = lambda k: float(np.mean([((oofs[h][k] - oofs[h]['y']) ** 2).mean() for h in ok])) if ok else np.inf
+            model = 'lgb' if avg('lgb') < avg('har') else 'har'       # 規則 2：LGBM 沒有比較好就用較簡單的 HAR
+            return oofs, model, avg(model), {'mse_har': avg('har'), 'mse_lgb': avg('lgb')}
+
+        base = run(False)
+        use_range, chosen = False, base
+        if hl is not None:
+            with_r = run(True)
+            use_range = with_r[2] < base[2]                         # 規則 5：平均誤差較低才採用高低價特徵
+            chosen = with_r if use_range else base
+            res['range_ab'][market] = {'used': bool(use_range), 'mse_without': base[2], 'mse_with': with_r[2],
+                                       'model_without': base[1], 'model_with': with_r[1]}
+        oofs, model, _, ms = chosen
+        res['chosen'][market] = {'model': model, **ms, 'use_range': bool(use_range)}
         res['validation'][market] = {str(h): (evaluate_oof(oofs[h], h, model) if oofs[h] is not None else None) for h in HORIZONS}
         for h in HORIZONS:
-            for t, p in predict_latest(dsets[h], feats, h, model).items():
+            for t, p in predict_latest(dsets[h], feats, h, model, use_range).items():
                 p['market'] = market
                 res['predictions'].setdefault(t, {})[str(h)] = p
         n_ok = sum(1 for v in res['validation'][market].values() if v and v['beats_baseline'])
-        res['status'].append(f"{mname}：{len(feats)} 檔，採用 {'LightGBM' if model == 'lgb' else 'HAR 線性模型'}，{n_ok}/{len(HORIZONS)} 個期間勝過基準")
+        res['status'].append(f"{mname}：{len(feats)} 檔，採用 {'LightGBM' if model == 'lgb' else 'HAR 線性模型'}"
+                             + ('、含高低價特徵' if use_range else '') + f"，{n_ok}/{len(HORIZONS)} 個期間勝過基準")
     return res
 
 
@@ -302,6 +338,7 @@ def scorecard():
 
 
 if __name__ == '__main__':
-    r = build_all(core.load_market())
+    import universe
+    r = build_all(core.load_market(), universe.load())
     save(r)
     print('\n'.join(r['status']))

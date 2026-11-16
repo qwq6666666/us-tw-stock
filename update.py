@@ -12,6 +12,8 @@ import model
 import outlook
 import scorecard
 import trend
+import relstrength
+import universe
 import volmodel
 
 
@@ -38,7 +40,18 @@ def main():
     close.to_csv(core.PRICES_CSV, encoding='utf-8-sig')
     market = core.Market(close)
 
+    try:                                          # 擴充名單（台股 ~58、美股 ~38）的收盤、最高、最低、成交量；失敗時保留前一次的檔案
+        uni_data, uni_dropped = universe.drop_unfinished(universe.download(universe.tickers()))
+        if len(uni_data['close'].columns) >= 80:
+            universe.save(uni_data)
+            uni_msg = f"擴充名單：{len(uni_data['close'].columns)} 檔" + ('；已略過尚未收盤的資料：' + '、'.join(uni_dropped) if uni_dropped else '')
+        else:
+            uni_msg = f"擴充名單：只下載到 {len(uni_data['close'].columns)} 檔，不更新"
+    except Exception as e:
+        uni_msg = f'擴充名單：失敗（{type(e).__name__}: {str(e)[:80]}）'
+
     news, status = core.fetch_all_news()
+    status.append(uni_msg)
     if unfinished:
         status.append('已略過尚未收盤的價格：' + '、'.join(unfinished))
     archive = core.update_archive(news)
@@ -74,8 +87,16 @@ def main():
     except Exception as e:
         status.append(f'趨勢實測：失敗（{type(e).__name__}: {str(e)[:80]}）')
 
+    try:                                          # 相對強弱（橫斷面動能）驗證與目前排名；失敗時保留前一次的檔案
+        rres = relstrength.build_all()
+        if rres:
+            relstrength.save(rres)
+            status += ['相對強弱：' + x for x in rres['status']]
+    except Exception as e:
+        status.append(f'相對強弱：失敗（{type(e).__name__}: {str(e)[:80]}）')
+
     try:                                          # 波動預測：模型、只能新增的預測紀錄、到期結果；失敗時保留前一次的檔案
-        vres = volmodel.build_all(market)
+        vres = volmodel.build_all(market, universe.load())    # 有高低價資料時做 A/B，依事先規則決定是否採用
         volmodel.save(vres)
         v_new, v_done = volmodel.append_predictions(vres), volmodel.resolve_new(market.close_all)
         status += ['波動預測：' + x for x in vres['status']]
