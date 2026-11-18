@@ -1,4 +1,386 @@
 ﻿time,market,source,ticker,title,summary,url
+2026-11-18 12:34:56,台股,鉅亨網,"2330,3711,2454,3443,3661",台股搭雲霄飛車高低震盪逾1600點 國泰：多方回神看4個止跌訊號,台股今一度跌破4萬點，盤中急彈逾500點、震盪逾1600點，低接買盤湧現&#10;國泰證期：輝達財報可點燃反彈，關鍵看下一季財測、Vera Rubin量產進度&#10;台股止跌待外資賣壓、融資去化、新台幣止貶及高價股止穩；AI供應鏈需求仍有撐,https://news.cnyes.com/news/id/6666080
+2026-11-18 12:31:52,台股,鉅亨網,8210,勤誠(8210)估值修正後2028年預估本益比不到8倍，獲利下修風險已反映？法人升評買進,,https://news.cnyes.com/news/id/6666091
+2026-11-18 12:30:26,美股,鉅亨網,,OpenAI新模型才推出 知名測試者寫長文「為什麼我討厭它」,OpenAI週二推出GPT-6.2 Astra與Sol，Astra主打複雜專業工作，旗艦款比前代便宜兩成。&#10;搶先試用評價兩極：Shumer稱「基本上沒法用」，Browne批最差，但Mollick與部分測試者肯定3D、動畫與影片能力。&#10;勁敵新模型接連上場，OpenAI稱內部已把平價版Sol作預設。,https://news.cnyes.com/news/id/6665746
+2026-11-18 12:22:06,美股,Stocktwits,NVDA,"BE Stock Rises Overnight After Nvidia Earnings: Insiders Report $1.3M In Share Sales, Retail Sees $200 Ahead","Bloom Energy’s Chief Operations Officer Satish Chitoori, and Chief Commercial Officer Aman Joshi, sold shares worth a combined value of about $1.3 million.",https://stocktwits.com/news-articles/markets/equity/be-stock-rises-overnight-after-nvidia-earnings-insiders-report-1-3-m-in-share-sales-retail-sees-200-ahead/cNbXYTxR9hY
+2026-11-18 12:20:03,美股,鉅亨網,NVDA,輝達的「隱身」重要市場！新加坡子公司營收破千億美元、年增72%,"輝達新加坡子公司2025年營收1,040億美元，年增72%，截至2026年1月過去12個月升至1,178億美元。&#10;但2025年獲利僅5,300萬美元；帳面營收與當地實際生產、銷售或交付規模不一致。&#10;輝達自2025年起不再單獨揭露新加坡營收，改按客戶總部所在地分類，外界難追蹤其新加坡業務。",https://news.cnyes.com/news/id/6665752
+2026-11-18 12:10:38,台股,鉅亨網,1476,鉅亨速報 - Factset 最新調查：儒鴻(1476-TW)EPS預估上修至25.08元，預估目標價為446元,,https://news.cnyes.com/news/id/6666061
+2026-11-18 12:10:36,台股,鉅亨網,6515,鉅亨速報 - Factset 最新調查：穎崴(6515-TW)EPS預估下修至90.14元，預估目標價為8100元,,https://news.cnyes.com/news/id/6666060
+2026-11-18 12:10:35,台股,鉅亨網,6488,鉅亨速報 - Factset 最新調查：環球晶(6488-TW)EPS預估下修至18.04元，預估目標價為865元,,https://news.cnyes.com/news/id/6666059
+2026-11-18 12:10:22,台股,鉅亨網,6488,鉅亨速報 - Factset 最新調查：環球晶(6488-TW)目標價調降至865元，幅度約5.98%,,https://news.cnyes.com/news/id/6666058
+2026-11-18 12:10:05,美股,鉅亨網,NVDA,黃仁勳卸任後X藍勾勾消失 暖男馬斯克霸氣喊「免費奉還！」,黃仁勳卸任執行長後，X 個人帳號藍勾勾與輝達企業徽章消失，馬斯克回覆「免費我請客」並迅速恢復。&#10;黃仁勳 11 月 12 日請辭執行長，輝達由財務長 Colette Kress 暫代，董事會仍未考慮讓他復職。&#10;黃仁勳回鍋連署已超過 19.1 萬人，輝達股價收跌 0.44%，盤後漲約 2%。,https://news.cnyes.com/news/id/6665658
+2026-11-18 12:09:26,台股,鉅亨網,2467,志聖連兩年獲ESG for Culture影響力獎 以「成人之美」實踐文化永續,,https://news.cnyes.com/news/id/6666057
+2026-11-18 12:00:25,台股,鉅亨網,8210,勤誠(8210-TW)估值修正後2028年預估本益比不到8倍，獲利下修風險已反映？法人升評買進,,https://news.cnyes.com/news/id/6666028
+2026-11-18 11:50:13,美股,鉅亨網,,美股牛市還能跑多久？高盛：2027年再漲17% 標普上看8700點 但最強獲利成長階段已過,高盛預測美股牛市延續至2027年，標普500明年底看8700點，較目前約漲17%&#10;高盛估標普企業獲利增速將由2026年30%降至2027年18%，AI資本支出放緩拖累成長&#10;2027年仍有利率走升與AI投資不確定性；看好雲端、回購貴族、能源基建，並建議配置醫療與必需消費,https://news.cnyes.com/news/id/6665993
+2026-11-18 11:50:10,美股,鉅亨網,"CRWV,NBIS,NVDA,AMZN,GOOGL",Anthropic IPO認購超額近7倍！艾斯曼卻稱「已不重要」：AI資料中心建設才是市場關鍵,Anthropic IPO認購近7倍，11/10訂價70至78美元，8.25億股、周四掛牌&#10;艾斯曼稱Anthropic IPO不重要，真正關鍵是美國限制AI資料中心建設的程度&#10;若建設放緩10%至30%，大型雲端有利；小型業者如CoreWeave、Nebius恐受融資衝擊,https://news.cnyes.com/news/id/6665747
+2026-11-18 11:46:39,台股,鉅亨網,3491,攻LEO商機 麥森創新完成現增案籌資21億元並引進昇達科等投資人,麥森創新完成現增募集21億元，股本由1.69億增至2.24億元，並引進昇達科等策略投資人。&#10;現增股每股388元，昇達科認購15萬股，占增資後股本約0.7%；另有水木開發基金、群創開發貳基金、叁石資本、益鼎創投參與。&#10;麥森創新預計2027年首季登錄與櫃交易。,https://news.cnyes.com/news/id/6666012
+2026-11-18 11:39:20,台股,鉅亨網,00984D,主動選債超吸金！00984D規模暴增6.6倍 連8次配0.085元「這天」最後上車日,00984D第8次配息，每受益權單位預估0.085元，12月1日除息，11月30日最後買進日。&#10;00984D自今年1月成立以來規模成長6.6倍、受益人數增5.5倍；截至11月13日持續受市場青睞。&#10;AI股震盪下，非投等債具防禦力；彭博美國非投等債指數第4季來逆勢漲0.7%。,https://news.cnyes.com/news/id/6666008
+2026-11-18 11:35:42,台股,鉅亨網,"2454,6531,3037,8046,3189,4958,2383,6213,5475,1303,1815,3081,3163,4977,3443,3008",美兩黨聯手解決AI缺電！台股回測年線保衛戰，「3型態＋2指標」抓住黃金買點！,美國參院通過BAAJA終止辯論程序，法案可望數週內過關，聚焦加速美國基建審查與開發。&#10;BAAJA放寬NEPA、清潔水法等限制，並擴大FERC輸電許可權、加速再生能源與電網擴建。&#10;法案要求大型資料中心自付電網升級成本，反映AI用電與電費上漲衝突，市場高度關注。,https://news.cnyes.com/news/id/6666007
+2026-11-18 11:30:07,美股,鉅亨網,NVDA,黃仁勳離職後 輝達：開源AI策略維持不變,Kress重申輝達承諾開源AI，稱開放模型加速普及，OpenRouter每週Token年增35倍&#10;輝達9月同意收購Hugging Face，將成史上第二大併購，平台仍按原計畫併入&#10;Kress稱Nemotron是OpenRouter最廣泛使用的美國開放模型。黃仁勳辭任，外界曾憂輝達開源策略,https://news.cnyes.com/news/id/6665686
+2026-11-18 11:30:06,台股,鉅亨網,"2330,3189,3711,2449,3037,NVDA,AMKR",台積電高層親赴輝達關切訂單 供應鏈增援推升明年成長率上修至75%,,https://news.cnyes.com/news/id/6666004
+2026-11-18 11:30:06,台股,鉅亨網,3044,台股盤中／本益比殺到9.3倍，投信逆勢敲進！健鼎(3044)昨重挫近9%，今攻上漲停,,https://news.cnyes.com/news/id/6666003
+2026-11-18 11:30:02,美股,Motley Fool,AAPL,Broadcom vs. Micron Technology: Which Tech Stock Is the Better Buy for 2027?,"Both chipmakers are riding the AI spending boom, but they sell very different things, and the valuation gap between them is wide.",https://www.fool.com/coverage/better-buy/2026/11/17/broadcom-vs-micron-technology-which-tech-stock-is-the-better-buy-for-2027/
+2026-11-18 11:22:11,台股,鉅亨網,,〈台幣〉33元上下拋補激烈拉扯 國家隊蹲馬步穩台股匯市,台北股匯市18日續弱，加權指數盤中跌破4萬點，最低39260點、跌逾800點，但國安基金穩守低檔又翻紅。&#10;新台幣由32.83元轉貶，11點15分最低33.002元，貶幅逾0.45%，市場關注33元是否為央行容忍底線。,https://news.cnyes.com/news/id/6665998
+2026-11-18 11:20:41,台股,鉅亨網,"1301,8111",台塑新智能攜手立碁強化供電韌性 擴大全台微電網布局建置,台塑新智能與立碁電子簽署合作協議，共推台灣微電網建置，強化區域供電韌性。&#10;台塑新智能今年防災微電網涵蓋9處校園與公共設施，導入100kW/219kWh儲能，均已接近完工。&#10;太平島微電網已上線，採100kW/109kWh儲能、160.23kW太陽光電與500kW柴油機，降低柴油消耗。,https://news.cnyes.com/news/id/6665994
+2026-11-18 11:20:05,美股,鉅亨網,"NVDA,CRWV,NBIS",黃仁勳卸任後輝達轉向審慎投資！代理執行長：不再無限制砸錢支持AI新創,輝達稱，將持續支持AI新創與生態系，但未來對投資、承諾與財務擔保將更嚴格評估，不會無限制投入資金。&#10;克雷斯表示，輝達會對Neocloud等業者維持有紀律、具選擇性的支持。&#10;董事會主席Harvey Jones否認黃仁勳回鍋執行長，並稱董事會一致接受其辭職；公司拒答其離職及調查相關提問。,https://news.cnyes.com/news/id/6665808
+2026-11-18 11:18:22,台股,鉅亨網,,新光人壽攜手將來銀行推出意外保障自由配 網路投保「8選1」建構保險防護罩,,https://news.cnyes.com/news/id/6665999
+2026-11-18 11:11:20,美股,Simply Wall St.,TSM,Taiwan Semiconductor Manufacturing (NYSE:TSM) Shares Tumble As Customer Shock Clouds AI Outlook,"Taiwan Semiconductor Manufacturing (NYSE:TSM) shares fell sharply after Nvidia CEO Jensen Huang resigned, intensifying concern around a key customer relationship. Fresh U.S. rules tightened remote access to advanced AI chips, adding pressure to TSMC's high end data center demand outlook. TSMC signed a multi year advanced packaging agreement with Xintec that targets CoWoS capacity constraints through 2033. The TSMC sell off after Jensen Huang's exit and new U.S. AI chip controls only tells...",https://finance.yahoo.com/markets/stocks/articles/taiwan-semiconductor-manufacturing-nyse-tsm-031120579.html
+2026-11-18 11:10:03,美股,鉅亨網,,富國銀行點名2027年兩大獲利亮點 美債殖利率5.25%是關鍵,富國銀行估標普500 EPS年增率第三季觸頂，2027年中將放緩至17%至19%。&#10;看好超大型雲端與醫療保健股，偏重優質股與AI服務企業，對半導體與高貝塔股轉趨保守。&#10;若美債10年期殖利率續高於5.25%，恐成美股轉折點，整體股市壓力加劇。,https://news.cnyes.com/news/id/6665662
+2026-11-18 11:04:29,美股,24/7 Wall St.,AAPL,"A Retiree With $400,000 in His 401(k) Tries to Move Money Before Stocks Fall Further. Apple’s Widespread Outage Raises the Stakes of a Missed Trade","An Apple outage locks a retiree out of his 401(k) just as stocks wobble, and his panic fix could hurt more than the drop itself. The costly mistake hides in one form, and Medicare notices it two years later.",https://247wallst.com/personal-finance/2026/11/17/a-retiree-with-400000-in-his-401k-tries-to-move-money-before-stocks-fall-further-apples-widespread-outage-raises-the-stakes-of-a-missed-trade/
+2026-11-18 11:04:17,台股,鉅亨網,7867,〈居家修繕大商機〉特力屋轉型「居家修繕平台」有成 將快速擴全台版圖,特力屋轉型「一站式居家服務平台」，整合商品、諮詢、丈量、施工與售後，已簽約近300家合作工班。&#10;內政部統計全台屋齡30年以上住宅588萬宅、65歲以上人口逾480萬，帶動居家專業整修需求。&#10;特力屋規劃未來每年淨增6-8家，法人看好自有品牌與服務收入占比提升、獲利結構優化。,https://news.cnyes.com/news/id/6665983
+2026-11-18 11:02:50,美股,鉅亨網,NVDA,黃仁勳想重返輝達 盤點他手上兩張牌,黃仁勳想重返輝達。&#10;輝達董事會不打算恢復黃仁勳職務。&#10;黃仁勳及其關聯實體目前持有約3.5%輝達股份，且持股超過三年。,https://news.cnyes.com/news/id/6665883
+2026-11-18 11:00:14,美股,鉅亨網,NVDA,〈輝達法說〉進入後黃仁勳時代，輝達揭接班危機、監管壓力與AI融資風險,"輝達Q3營收1,158億美元、EPS2.70美元，Q4營收估1,300億美元，2028財年營收成長預期上調至約75%&#10;輝達董事會已表明不讓黃仁勳回任，並啟動CEO遴選&#10;資料中心業務分Hyperscale與ACIE，雲端積壓訂單升至2.5兆美元；中國Hopper銷售24億美元後已停出貨",https://news.cnyes.com/news/id/6665832
+2026-11-18 11:00:14,美股,鉅亨網,,14個月新低！Fed官員接連暗示升息　現貨黃金摔1.2%失守3800美元大關,國際現貨金價今跌1.2%，連3日走低並失守3800美元，創去年9月30日以來新低&#10;Fed官員Musalem、Williams暗示仍需升息對抗通膨，市場料下月、明年1月各升息1碼，明年4月前再升息&#10;自2月28日美伊衝突爆發後金價已跌逾四分之一；分析師稱購買興趣低迷，4000美元以下停留越久越易再遭拋售,https://news.cnyes.com/news/id/6665968
+2026-11-18 10:49:19,台股,鉅亨網,,日月光旗下矽品與輝達簽署數十億美元協議 2029年中先進封裝產能擴增3倍,矽品與NVIDIA簽署數十億美元多年期協議，將在台灣大幅擴充一元化先進封裝產能。&#10;矽品預計在2029年中前，將先進封裝產能擴增至3倍，支援NVIDIA次世代AI平台。&#10;協議涵蓋晶圓凸塊、封裝到測試新產線與自動化升級，目標縮短交期並強化AI供應韌性。,https://news.cnyes.com/news/id/6665977
+2026-11-18 10:48:44,台股,鉅亨網,,3家純網銀前3季存款衝破2300億元 累虧持續收斂,"截至2026年9月底，三家純網銀存款2,346億元、放款1,850億元，年增皆逾雙位數，累計虧損合計72.92億元，較去年同期87.82億元收斂。&#10;連線銀行今年前三季稅前盈餘2.76億元，自去年12月起轉虧為盈後持續穩定獲利。&#10;將來銀行前三季累虧29.5億元，逼近資本額100億元的法定1/3門檻。",https://news.cnyes.com/news/id/6665969
+2026-11-18 10:44:20,台股,鉅亨網,,AI股急跌後怎麼看？野村投信：後市緊盯「三大指標」　布局具競爭優勢供應鏈,美期中選舉後，市場憂AI資料中心監管、融資成本與回收期，美股重挫，費半跌約12%，台股同步承壓。&#10;野村投信稱，若建設延後但資本支出與融資成本不減，營收與回收遞延，短線賣壓集中高評價AI供應鏈。&#10;後續看雲端業者資本支出、供應鏈訂單出貨及AI營收；布局聚焦先進製程、封裝、散熱、ABF、PCB等。,https://news.cnyes.com/news/id/6653244
+2026-11-18 10:40:13,美股,鉅亨網,"AAPL,MSFT,JPM",美國多項關鍵系統接連故障！國家安全局、蘋果出狀況  FBI示警AI駭客3小時可入侵,NSA Net維護中斷，蘋果內部更新也致App Store、iCloud等多項服務故障，Equinor則證實遭持續網攻。&#10;FBI示警，駭客利用AI滲透框架ARTEX自動化攻擊，最快3小時可取得目標系統特權存取權限。&#10;近5天微軟365、FAA及摩根大通等多起故障接連發生。,https://news.cnyes.com/news/id/6665761
+2026-11-18 10:39:03,台股,鉅亨網,2947,〈居家修繕大商機〉振宇五金全台年底前達百店 目標成「社區修繕中心」,振宇五金12月6日新竹湖口、台南麻豆店開幕，全台門市增至101家，將突破百店。&#10;台灣人屋雙老帶動修繕需求。&#10;10月「油漆防水」銷售年增14.60%居冠，會員逾73.8萬人，營收占比54.97%。,https://news.cnyes.com/news/id/6665962
+2026-11-18 10:35:37,台股,鉅亨網,"4904,AMZN",遠傳響應臺灣次世代通訊產業聯盟倡議 推動衛星通訊與手機直連衛星,遠傳響應TNGCA倡議，聚焦衛星頻段申請審查、行動與衛星頻譜共用、E2E入網測試及手機直連衛星服務。&#10;手機直連衛星方面，遠傳已與Elveo Mobile簽合作。&#10;衛星低軌衛星部分，與Amazon Leo法規程序陸續完成，預計明年在台商轉。,https://news.cnyes.com/news/id/6665966
+2026-11-18 10:32:37,美股,鉅亨網,,黃仁勳離任後首場財報會議：為何營收翻倍 市場卻擔心毛利率？,輝達第三季營收1158億美元、資料中心營收1076億美元，均年增103%且優於預期&#10;董事會稱無意恢復黃仁勳執行長職務，正審慎尋找接班人&#10;克蕾絲上調2028財年營收增長預期至75%，但第四季毛利率估降至71%-72%，採購承諾約3900億美元、擔保最高1180億美元,https://news.cnyes.com/news/id/6665857
+2026-11-18 10:30:07,美股,鉅亨網,,NAND明年跌價警報！廣發、集邦同估Q2反轉 點名SanDisk、鎧俠、群聯,,https://news.cnyes.com/news/id/6665661
+2026-11-18 10:29:41,台股,鉅亨網,,台股一個月打八五折！剩2檔主動債券ETF沒破發 00987D最抗跌,,https://news.cnyes.com/news/id/6665961
+2026-11-18 10:25:33,美股,鉅亨網,"NVDA,CSCO,MSFT,AMD",輝達臨時CEO首度露面穩軍心：客戶催貨、員工沒走 明年度營收成長上看75%,輝達財測優於預期，將2028會計年度營收成長預期由70%上修至75%。&#10;暫代執行長克瑞斯稱超大規模雲端商積極要更多運算資源，供應條件正到位。&#10;她駁斥黃仁勳離職引發客戶與員工出走疑慮，稱團隊仍具向心力，盤後股價漲近4%。,https://news.cnyes.com/news/id/6665867
+2026-11-18 10:18:06,台股,鉅亨網,"3441,3406,3362,6690,8272,3704",盤中速報 - 集中市場加權指數下跌-800.17點至39291.94點，跌幅2%,,https://news.cnyes.com/news/id/6665946
+2026-11-18 10:17:03,台股,鉅亨網,"3441,3406,3362,6690,8272,3704",盤中速報 - 櫃買市場加權指數下跌-12.27點至294.34點，跌幅4%,,https://news.cnyes.com/news/id/6665942
+2026-11-18 10:15:12,台股,鉅亨網,"3189,3711,2330,2317,2449,3037,NVDA",輝達擴大與供應鏈夥伴合作 台積電、鴻海、景碩及矽品等4台廠入列,輝達擴大與景碩、矽品、台積電、鴻海等台廠合作，擴產載板、先進封裝、晶圓製造及委託製造。&#10;景碩先進ABF載板產能將增逾3.5倍，預計2027年下半年投產；矽品先進封裝目標2029年年中增產。&#10;輝達稱此舉為目前及下一世代加速運算平台做準備，鴻海、台積電也將支援AI基礎設施與新平台量產。,https://news.cnyes.com/news/id/6665855
+2026-11-18 10:00:06,美股,鉅亨網,"NVDA,CRWV,SPCX,SPCX",SpaceX大手筆租用輝達晶片！470億美元交易背後融資風險浮現,SpaceX租用約470億美元輝達Vera Rubin晶片，高盛與阿波羅擬售出約400億美元融資債權。&#10;交易採SPV租賃模式，SpaceX先付70億美元，租期約5年至2032年，晶片風險由貸方承擔。&#10;SpaceX債務升至近390億美元，CDS攀至265個基點；市場憂AI晶片融資成瓶頸。,https://news.cnyes.com/news/id/6665687
+2026-11-18 10:00:00,美股,The Wall Street Journal,AAPL,Mary Barra Transformed GM. Her Successor May Have to Do It Again.,"Under Barra, GM has become leaner and more profitable—but the next CEO faces high-tech challenges in China and beyond.",https://www.wsj.com/business/autos/mary-barra-transformed-gm-her-successor-may-have-to-do-it-again-aca050e9?siteid=yhoof2&yptr=yahoo
+2026-11-18 09:59:47,台股,鉅亨網,"6690,8272,3704",盤中速報 - 櫃買市場加權指數下跌-9.27點至297.34點，跌幅3.02%,,https://news.cnyes.com/news/id/6665897
+2026-11-18 09:50:41,台股,鉅亨網,"2471,6221,6112,6690,8272",盤中速報 - 櫃買市場加權指數下跌-6.16點至300.45點，跌幅2.01%,,https://news.cnyes.com/news/id/6665892
+2026-11-18 09:50:05,美股,鉅亨網,"2317,NVDA,MSFT,CRM,PLTR,CRWD,CDNS,SNPS,CRWV,AMZN,DELL,HPE,IREN,JPM,NBIS,ORCL,VRT,META,TSM,META",〈輝達法說〉黃仁勳辭任後首場法說！輝達上調2028年營收展望至75%：公司路線、野心都不變,輝達第三季營收1160億美元、毛利率74.9%創高，資料中心營收1080億美元，Hopper租賃價最高達原始兩倍。&#10;董事會確認黃仁勳辭任總裁、執行長及董事，已任命克雷斯為臨時執行長，並啟動正式執行長遴選。&#10;輝達上調2028財年營收成長至約75%，第四季估1300億美元，並再加碼1500億美元庫藏股。,https://news.cnyes.com/news/id/6665869
+2026-11-18 09:49:10,台股,鉅亨網,"2855,8046,3037,3189,2308,2454,2330,TSM,NVDA",〈台股開盤〉大盤反彈846點後如曇花一現震盪翻黑 台積電仍是多空指標,,https://news.cnyes.com/news/id/6665886
+2026-11-18 09:40:16,美股,鉅亨網,NVDA,離任輝達CEO仍能牽動決策！路透：黃仁勳憑3.5%持股握有兩席董事提名權,黃仁勳辭任輝達執行長後，仍可依規則提名2名董事影響公司決策。&#10;輝達規定持股逾3%、滿3年者可提名董事；黃仁勳持股約3.5%。&#10;董事會已就黃仁勳涉外國情報事件啟動調查。財報公布後，盤後股價漲逾4%。,https://news.cnyes.com/news/id/6665743
+2026-11-18 09:40:10,台股,鉅亨網,,【融資再減157億，跌夠了嗎？】4大落底訊號曝光，這檔AI成長股準備反攻？！,"台股本周急跌，兩天合計重挫3583點，上市融資餘額兩天減近279億元。&#10;文中指大盤落底關鍵看「多方缺口」，並以站穩月線、台幣止貶、突破41,500點頸線為確認訊號。&#10;看好台積電、聯發科、世芯-KY與0050，認為在超跌位階可分批布局。",https://news.cnyes.com/news/id/6665876
+2026-11-18 09:32:47,美股,Reuters,AAPL,Nvidia says 'no' to rehiring Huang and WSJ reports SEC is probing the chipmaker,"WASHINGTON/SAN FRANCISCO, Nov 17 (Reuters) - Nvidia's leadership signaled they would brook no dissent in their plan to find a new CEO, rejecting a ""Stand With Jensen"" campaign from allies of departed CEO Jensen Huang, even as the Wall Street Journal reported a regulator was probing Nvidia. A growing effort to reinstate Huang had complicated the search, and Huang said on Tuesday he would be ""honored"" to return if the ‌board deemed it best.",https://finance.yahoo.com/news/nvidia-board-forms-committee-national-102208048.html
+2026-11-18 09:30:04,美股,鉅亨網,NVDA,黃仁勳離職後輝達重大改組 新設國安委員會強化出口管制監督,輝達董事會週二成立常設「國家安全與出口管制監督委員會」，監督國安政策、出口管制合規與全球貿易風險&#10;委員會由Suzanne Nora Johnson任主席，國安與全球貿易合規團隊將直接向其報告，並至少每季開會一次&#10;公告稱此舉強化公司治理與董事會監督；同時外界關注黃仁勳離職爭議，董事會稱未考慮讓他回任,https://news.cnyes.com/news/id/6665767
+2026-11-18 09:30:04,美股,鉅亨網,,輝達財報答案早寫好！微軟谷歌亞馬遜Meta四大客戶上月成績早洩底牌　支出翻倍仍喊不夠,微軟、谷歌、亞馬遜、Meta今年Q3在資料中心、晶片與設備合計砸下2070億美元，年增近倍，建設速度仍遠落後需求&#10;輝達財務長估五大雲端巨頭今年支出逼近8000億美元、2027年上看1.3兆&#10;支出缺口改靠舉債，五大公司去年發行1210億美元公司債；四大客戶權重高，電力或融資卡關恐同步衝擊晶片商與ETF,https://news.cnyes.com/news/id/6665836
+2026-11-18 09:20:06,美股,鉅亨網,AMD,AMD資料中心營收暴增97%！蘇姿丰喊2027年營收成長逾80% 讚黃仁勳但屬「產業雜音」,蘇姿丰稱輝達與黃仁勳「了不起」，但強調AMD應聚焦AI基礎設施商機與長期成長。&#10;AMD第三季營收133.8億美元、年增45%；資料中心營收85.5億美元、年增97%，占總營收約64%。&#10;AMD估資料中心營收占比2027年突破80%，全球伺服器CPU市場2030年將達約2200億美元。,https://news.cnyes.com/news/id/6665762
+2026-11-18 09:10:04,美股,鉅亨網,,紐約Fed總裁排除12月大幅升息可能性,紐約聯準銀行總裁威廉斯稱，12月不需劇烈行動，市場仍預期Fed升息1碼機率98%。&#10;10月CPI月增0.4%、核心CPI月增0.3%，皆高於預期；9月核心PCE年增3.1%。&#10;威廉斯指關稅進口品、能源成本與AI投資推升物價，若持續將成進一步升息因素。,https://news.cnyes.com/news/id/6665683
+2026-11-18 09:00:36,美股,鉅亨網,NVDA,輝達退出中國H200晶片市場！代理執行長證實停止銷售、美新出口管制恐衝擊營收,輝達代理執行長克雷斯表示，公司將不再向中國銷售H200 AI晶片。&#10;美國16日新規禁先進晶片供應透過海外資料中心服務中國客戶；輝達明年資料中心營收恐減440億至620億美元。&#10;克雷斯稱Vera Rubin需求積壓不影響整體營收，但若資料中心無法證明不服務中國客戶，可能轉向其他晶片商。,https://news.cnyes.com/news/id/6665807
+2026-11-18 08:56:57,美股,鉅亨網,,Athropic IPO引現有股東追捧　紅杉、Lightspeed等機構擬斥巨資加碼,Anthropic IPO獲紅杉、Iconiq、Lightspeed、Accel、Altimeter追捧，擬合計砸數十億美元認購&#10;Lightspeed投資逾35億美元、Iconiq逾60億美元；紅杉已投30億美元持有約1%股份&#10;市場認購倍數達七倍，若計260億美元私募配售，募資額或達904億美元,https://news.cnyes.com/news/id/6665827
+2026-11-18 08:50:03,美股,鉅亨網,"COST,WMT,HD,LOW,TSCO",微軟當機、全美停飛引爆末日焦慮！美國好市多高價發電機26款剩5款有貨,"微軟Outlook當機及全美航班停飛後，恐慌性採購帶動好市多10月同店銷售增幅擴大至8.1%。&#10;瑞穗將好市多目標價由1,100美元調升至1,150美元，稱10月底起米、罐頭、水、發電機等需求增加。&#10;好市多線上26款高價發電機有21款售罄；股價今年漲29%，但預估本益比47.61倍、估值偏高。",https://news.cnyes.com/news/id/6665727
+2026-11-18 08:40:03,美股,鉅亨網,"NVDA,CRM,NKE,UNH,IBM,JPM",美股遭血洗！道瓊一度狂瀉逾1000點 賣壓為何席捲各類股？,美股週二全面下挫，道瓊盤中一度跌逾1000點，終場重挫848.75點，標普500跌破200日均線。&#10;黃仁勳辭任輝達執行長，AI類股承壓；《巴隆》指輝達是多家小型AI公司重要資金來源。&#10;美媒傳機密國安通訊網路中斷後賣壓擴大，標普 11 大類股全收低，台積電ADR跌3.68%。,https://news.cnyes.com/news/id/6665660
+2026-11-18 08:34:33,美股,鉅亨網,"NVDA,MU,AAPL",美股重點新聞摘要2026年11月18日,,https://news.cnyes.com/news/id/6665275
+2026-11-18 08:30:12,美股,鉅亨網,,輝達醜聞比外界看到的更嚴重？安然吹哨人：恐引爆整條AI產業鏈,"Bethany McLean警告，輝達醜聞最終殺傷力可能「both bigger and uglier」，11/18國會簡報會將成關鍵驗證點&#10;黃仁勳11/8承認對妻子不忠，輝達董事會啟動獨立調查；11/12宣布辭去所有職務&#10;輝達市值蒸發逾1,900億美元，外界憂調查恐擴及合規、出口管制與AI產業鏈",https://news.cnyes.com/news/id/6665693
+2026-11-18 08:30:06,美股,鉅亨網,NVDA,輝達董事長表態不讓黃仁勳回任委任獵才公司尋找新執行長,,https://news.cnyes.com/news/id/6665815
+2026-11-18 08:30:06,美股,鉅亨網,MSFT,微軟推MAI Code 2程式模型主打低成本並擴大AI資安布局,,https://news.cnyes.com/news/id/6665816
+2026-11-18 08:05:21,美股,The Wall Street Journal,AAPL,"Once the Market Cap King, Nvidia Has Now Fallen More Than $1 Trillion Behind Apple",What a difference 11 days makes.,https://www.wsj.com/livecoverage/nvidia-earnings-stock-market-news-11-17-2026/card/once-the-market-cap-king-nvidia-has-now-fallen-more-than-1-trillion-behind-apple-e5t7w6LIQs2cXTAy1fIS?siteid=yhoof2&yptr=yahoo
+2026-11-18 07:44:51,美股,Yahoo Finance Video,NVDA,Nvidia's Q3 numbers were pretty good. Its earnings call optics were another story.,"Yahoo Finance Executive Editor Brian Sozzi runs down Nvidia's (NVDA) third quarter earnings call, wondering why analysts didn't ask questions about former CEO Jensen Huang and how the company handled the call. ",https://finance.yahoo.com/video/nvidias-q3-numbers-were-pretty-good-its-earnings-call-optics-were-another-story-234451647.html
+2026-11-18 07:30:44,美股,Yahoo Finance Video,NVDA,"Nvidia earnings special coverage: ""The street wants to believe in Nvidia after Jensen""",Yahoo Finance Executive Editor Brian Sozzi covers the first Nvidia earnings call post-Jensen Huang. He covers what he heard about their search for a new CEO and talent retention after the scandal. As well as what he thinks the streets are expecting of Nvidia in this new era. ,https://finance.yahoo.com/video/nvidia-earnings-special-coverage-the-street-wants-to-believe-in-nvidia-after-jensen-233044562.html
+2026-11-18 06:52:53,美股,24/7 Wall St.,TSM,"Nvidia Is Only 17% of SMH. After Its Beat, the Chip ETF Jumped Almost as Much as Nvidia Did","Nvidia is 17% of the biggest chip ETF, but SMH rose almost as much as Nvidia after its beat. Where the move came from, what happened after past reports, and what it means for a $10,000 stake.",https://247wallst.com/investing/2026/11/17/nvidia-is-only-17-of-smh-after-its-beat-the-chip-etf-jumped-almost-as-much-as-nvidia-did/
+2026-11-18 06:47:00,美股,Barrons.com,AAPL,National Security Outage Is Just One Reason for Today’s Software Stock Selloff,People are extra sensitive to reports of software disruptions following a string of outages that have popped up over the past few days.,https://www.barrons.com/articles/stocks-selloff-outage-ai-1485984a?siteid=yhoof2&yptr=yahoo
+2026-11-18 06:38:46,美股,Yahoo Finance Video,NVDA,Nvidia interim-CEO Colette Kress speaks on quarterly revenue hitting $116B,"Nvidia (NVDA) interim CEO Colette Kress spoke about the company's third quarter earnings report, which recorded revenue of $116 billion, more than doubling year over year, and raised its fiscal 2028 revenue growth outlook.",https://finance.yahoo.com/video/nvidia-interim-ceo-colette-kress-speaks-on-quarterly-revenue-hitting-116b-224125904.html
+2026-11-18 06:32:24,美股,Yahoo Finance Video,NVDA,Nvidia with a positive Q3 despite SEC probing Nvidia amid Huang Scandal,"Deirdre Bosa discusses Jensen Huang's statement that he would be willing to return, the SEC's post-scandal probe into Nvidia (NVDA), and Nvidia's positive earnings report. 
+
+Deirdre Bosa then sits down with Mustafa Suleyman, Microsoft's (MSFT) AI chief, to discuss Microsoft's 6 new AI models, the AI competition, and the 'handoverism' worldview.
+
+'Deirdre Bosa Live' airs every day at 4 p.m. Tune in daily to hear how the latest developments in AI and technology are reshaping companies, industries, and the global economy.",https://finance.yahoo.com/video/nvidia-with-a-positive-q3-despite-sec-probing-nvidia-amid-huang-scandal-223224298.html
+2026-11-18 06:29:00,美股,Yahoo Finance Video,NVDA,Nvidia chair says board 'does not intend to reinstate Jensen as CEO',"Nvidia (NVDA) board Chairman Harvey Jones said on the company's third quarter earnings call that it does not intend to reinstate Jensen Huang as CEO, a week after he resigned from the post following ""personal behavior inconsistent with the company's code of conduct.""",https://finance.yahoo.com/video/nvidia-chair-says-board-does-not-intend-to-reinstate-jensen-as-ceo-233753438.html
+2026-11-18 06:09:36,美股,Yahoo Finance Video,NVDA,Nvidia earnings: Why Jensen turmoil won't have a near-term impact on the numbers,Uniphore CEO Umesh Sachdev and Morningstar equity strategist Brian Colello sit down with Deirdre Bosa to share their thoughts on Nvidia's (NVDA) latest earnings results in the wake of Jensen Huang's departure from the company.,https://finance.yahoo.com/video/nvidia-earnings-why-jensen-turmoil-wont-have-a-near-term-impact-on-the-numbers-220936057.html
+2026-11-18 06:03:49,美股,Stocktwits,AAPL,Fund Manager Lists Three Reasons He Still Won’t Buy Tesla Stock,"Gary Black, managing partner of The Future Fund LLC, sold his firm’s Tesla position in May 2025 at $356.",https://stocktwits.com/news-articles/markets/equity/fund-manager-lists-three-reasons-he-still-won-t-buy-tesla-stock/cNbOJB3R9hQ
+2026-11-18 06:01:59,美股,Yahoo Finance,NVDA,"AMD, Broadcom, CoreWeave stocks rise on Nvidia earnings beat",Semiconductor and AI infrastructure stocks moved higher in after-hours trading on Tuesday after AI chip heavyweight Nvidia posted better-than-expected quarterly results.,https://finance.yahoo.com/markets/stocks/article/amd-broadcom-tsmc-stocks-rise-on-nvidia-earnings-coreweave-nebius-shares-also-rally-220159436.html
+2026-11-18 05:54:47,美股,TheStreet,AAPL,Apple Pay outage blocks instant crypto purchases,The outage hits one of the most popular ways to buy Bitcoin instantly.,https://www.thestreet.com/crypto/markets/apple-pay-outage-blocks-instant-crypto-purchases
+2026-11-18 05:51:00,美股,Yahoo Finance Video,NVDA,Nvidia’s Q3 earnings show its advantage as the bank of the AI boom,"Yahoo Finance's Deirdre Bosa explains that Nvidia's (NVDA) role as a quasi-lender to smaller neo cloud customers means that part of its sales depends on customers it helps finance, which shows up in receivables and free cash flow.",https://finance.yahoo.com/video/nvidias-q3-earnings-show-its-advantage-as-the-bank-of-the-ai-boom-215423703.html
+2026-11-18 05:44:02,美股,Yahoo Finance Video,NVDA,Why a Jensen Huang comeback could become a major battle in Washington,"Semafor's editor in chief, Ben Smith, sits down with Deirdre Bosa to explain why Jensen Huang's return to Nvidia (NVDA) would be so contentious among politicians in Washington.",https://finance.yahoo.com/video/why-a-jensen-huang-comeback-could-become-a-major-battle-in-washington-214402053.html
+2026-11-18 04:21:55,美股,Insider Monkey,TSM,Surging AI Demand and Advanced Chipmaking Strengthens Taiwan Semiconductor Manufacturing Company Limited (TSM) Growth Outlook,"We just published our list, Ken Fisher Portfolio Review: 10 Highest-Conviction Technology Stocks for Long-Term Growth, and Taiwan Semiconductor Manufacturing Company Limited ranked 7th on this list. Ken Fisher, founder and former CEO of Fisher Asset Management, has historically maintained a constructive, growth-oriented view of technology stocks. His investment philosophy centers around companies with strong […]",https://finance.yahoo.com/technology/ai/articles/surging-ai-demand-advanced-chipmaking-202155834.html
+2026-11-18 03:34:24,美股,Yahoo Finance,AAPL,Apple outage today: iCloud and App Store down after a week of big outages,"Apple's iCloud and App Store problems follow outages at Microsoft, the FAA, Chase, and United.",https://finance.yahoo.com/markets/article/why-apple-is-down-in-a-week-of-outages-from-microsoft-to-chase-193424335.html
+2026-11-18 03:10:12,美股,TIKR,TSM,The 5 Best Stocks in George Soros’s Portfolio,"Key TakeawaysSoros Fund Management’s latest 13F shows its five biggest positions at Sept. 30 were Intel, Amazon, Taiwan Semiconductor, Alphabet and NVIDIA.",https://www.tikr.com/blog/the-5-best-stocks-in-george-soross-portfolio?ref=yahoofinance&tlnk=yf-261117-8999fh2f
+2026-11-18 03:01:03,美股,GuruFocus.com,TSM,TSMC Stocks Fall 4.26% as New US Rule Tightens Checks on Chip Foundries,"The BIS rule narrows how foundries can clear advanced logic orders from designers tied to restricted destinations, effective on November 19 publication.",https://finance.yahoo.com/markets/stocks/articles/tsmc-stocks-fall-4-26-190103464.html
+2026-11-18 02:52:28,美股,Wall Street Horizon,TSM,Beyond NVIDIA & Anthropic: 3 Important Stock Catalysts to Watch Into December,"FICO, Costco, and Ford have important interim updates ahead that could offer fresh clues about consumer credit, spending, and the auto industry.",https://www.wallstreethorizon.com/blog/Beyond-NVIDIA--Anthropic-3-Important-Stock-Catalysts-to-Watch-Into-December
+2026-11-18 01:42:19,美股,Trefis,TSM,Could Nvidia Stock Fall 50%? Follow The Cash,"For most of its 27 years as a public company, Nvidia collected more cash than it reported in profit. That matters. Profit is an accounting figure. Cash in the bank is a fact. It is a big reason investors have trusted Nvidia's numbers.",https://www.trefis.com/stock/nvda/articles/625113/could-nvidia-stock-fall-50-follow-the-cash/2026-11-17
+2026-11-18 01:21:45,美股,Trefis,TSM,Is SMH A Great Dip Buy At 31% Off?,Today's big story: Could Nvidia Stock Fall 50%? Follow The Cash.,https://www.trefis.com/stock/smh/articles/626017/is-smh-a-great-dip-buy-at-31-off/2026-11-17
+2026-11-18 01:21:45,美股,Trefis,TSM,Will Nvidia Guide Q4 Tonight? 3 Scenarios,Today's big story: Could Nvidia Stock Fall 50%? Follow The Cash.,https://www.trefis.com/stock/nvda/articles/626016/will-nvidia-guide-q4-tonight-3-scenarios/2026-11-17
+2026-11-17 23:11:00,美股,Zacks,ASX,"Baidu Q3 Earnings Miss, AI Cloud Strength Offsets Ad Weakness","BIDU's Q3 2026 revenues miss estimates as ad weakness weighs on results, but surging AI Cloud revenues and growth in AI-powered businesses offer support.",https://finance.yahoo.com/technology/ai/articles/baidu-q3-earnings-miss-ai-151100060.html
+2026-11-17 21:51:00,美股,Zacks,ASX,"Infleqtion Q3 Loss Narrows Y/Y, Revenues Rise on NASA Demand","INFQ's Q3 loss narrows as revenues rise 25% on NASA demand. Quantum computing milestones, NASA contracts and strong liquidity support its growth plans.",https://finance.yahoo.com/technology/ai/articles/infleqtion-q3-loss-narrows-y-135100339.html
+2026-11-17 18:40:00,台股,證交所重大訊息,2454,"聯發科：&#8206;(補充115/10/30公告) 代子公司匯發國際(香港)有限公司(下稱「匯發國際」)
+公告處分有價證券","1.證券名稱:
+深圳市匯頂科技股份有限公司(下稱「匯頂」)普通股股份
+2.交易日期:115/11/2~115/11/17
+3.董事會通過日期: 民國115年10月30日
+4.其他核決日期: 不適用
+5.交易數量、每單位價格及交易總金額:
+共處分匯頂普通股股份2,999,912股，平均交易價格為每股人民幣61.07元，
+總交易金額約人民幣1.83億元。&#8206;
+&#8206;(約新台幣9.04億元; 匯率採1人民幣對4.933新台幣計算)&#8206;
+6.處分利益（或損失）（取得有價證券者不適用）:
+認列其他綜合利益約人民幣1.41億元，對稅後淨利及每股盈餘無影響。&#8206;
+&#8206;(約新台幣6.98億元; 匯率採1人民幣對4.933新台幣計算)&#8206;
+7.與交易標的公司之關係:
+非關係人
+8.迄目前為止，累積持有本交易證券（含本次交易）之數量、金額、持股
+比例及權利受限情形（如質押情形）:
+持有匯頂股份之數量為826,800股；&#8206;
+於匯發國際帳面之價值約新台幣2.17億元；&#8206;
+持股比例約0.18%；&#8206;
+匯發國際將來如有出售匯頂股份事宜，仍應依當地相關法規辦理。&#8206;
+&#8206;(如以民國115年11月17日匯頂收盤價人民幣55.28元及匯率採
+1人民幣對4.933新台幣計算)&#8206;
+9.迄目前為止，依「公開發行公司取得或處分資產處理準則」第三條所列之有價證券投
+資（含本次交易）占公司最近期財務報表中總資產及歸屬於母公司業主之權益之比例
+暨最近期財務報表中營運資金數額:
+&#8206;0.03%；0.05%；新台幣34,681,614仟元 &#8206;
+&#8206;(如以民國115年11月17日匯頂收盤價人民幣55.28元及匯率採
+1人民幣對4.933新台幣計算)&#8206;
+10.取得或處分之具體目的:
+公司資金規劃
+11.本次交易表示異議董事之意見:
+無
+12.本次交易為關係人交易:
+否
+13.交易相對人及其與公司之關係:
+不適用，非關係人
+14.監察人承認或審計委員會同意日期:
+不適用，非關係人
+15.前已就同一件事件發布重大訊息日期:
+&#8206;115年10月30日
+16.其他敘明事項:
+上述交易包含民國115年11月17日之當日交易，惟該日之實際交易金額（以當日總成交
+股數乘以當日成交均價為基礎計算）應以券商於交割日後提供之對帳單為準，如因此導
+致公告之總交易金額、每股交易金額與實際之總交易金額、每股交易金額存在重大差異
+，將依規定進行更正公告。&#8206;",https://mops.twse.com.tw/
+2026-11-17 18:39:00,台股,證交所重大訊息,2454,聯發科：公告本公司限制員工權利新股註銷完成變更登記事宜,"1.主管機關核准減資日期:115/11/16
+2.辦理資本變更登記完成日期:115/11/16
+3.對財務報告之影響（含實收資本額與流通在外股數之差異與對每股淨值之影響）:
+(1)本次銷除股份28,706股，每股面額新台幣(以下同)壹拾元，
+共計減少資本287,060元。
+(2)RSA股份註銷減資前：本公司實收資本額為16,049,526,130元，
+流通在外股數為1,604,952,613股，每股淨值291.41元。
+(3)RSA股份註銷減資後：本公司實收資本額為16,049,239,070元，
+流通在外股數為1,604,923,907股，每股淨值291.41元。
+(註:每股淨值係以115年度第3季之財務報表為設算依據)。
+4.預計換股作業計畫:不適用
+5.預計減資新股上市後之上市普通股股數:不適用
+6.預計減資新股上市後之上市普通股股數占已發行普通股比率
+ （減資後上市普通股股數/減資後已發行普通股股數）:不適用
+7.前二項預計減資後上巿普通股股數未達6000萬股且未達25%者，請說明股權流通性偏低
+  之因應措施:不適用
+8.其他應敘明事項:無",https://mops.twse.com.tw/
+2026-11-17 17:40:00,台股,證交所重大訊息,2317,"鴻海：代子公司 Rayprus Japan Co., Ltd.公告取得
+Sony Semiconductor Solutions Corporation車載相機模組事業部","1.標的物之名稱及性質（屬特別股者，並應標明特別股約定發行條件，如股息率等）:
+Sony Semiconductor Solutions Corporation車載相機模組事業部
+之相關資產及負債等特定營運資產(包含存貨、固定資產、無形資產等)
+2.事實發生日:115/11/17~115/11/17
+3.董事會通過日期: 民國115年11月17日
+4.其他核決日期: 不適用
+5.交易數量、每單位價格及交易總金額:
+日幣7,241,000,000元
+本交易金額為初始交易金額，最終仍應依交易合約調整機制辦理，
+如最終價格有所調整，將另行公告。
+6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之
+關係人者，得免揭露其姓名）:
+Sony Semiconductor Solutions Corporation；無
+7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移
+轉之所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次
+移轉日期及移轉金額:
+不適用
+8.交易標的最近五年內所有權人曾為公司之關係人者，尚應公告關係人之取
+得及處分日期、價格及交易當時與公司之關係:
+不適用
+9.本次係處分債權之相關事項（含處分之債權附隨擔保品種類、處分債權
+如有屬對關係人債權者尚需公告關係人名稱及本次處分該關係人之債權
+帳面金額:
+不適用
+10.處分利益（或損失）（取得有價證券者不適用）（原遞延者應列表說明
+認列情形）:
+不適用
+11.交付或付款條件（含付款期間及金額）、契約限制條款及其他重要約定
+事項:
+依交易合約規定辦理；並本交易之交割尚待交易先決條件成就
+(包括但不限於取得 相關主管機關核准)後，始得辦理
+12.本次交易之決定方式、價格決定之參考依據及決策單位:
+議價；按市場行情；董事會
+13.取得或處分有價證券標的公司每股淨值:
+不適用
+14.迄目前為止，累積持有本交易證券（含本次交易）之數量、金額、持股
+比例及權利受限情形（如質押情形）:
+不適用
+15.迄目前為止，依「公開發行公司取得或處分資產處理準則」第三條所列
+之有價證券投資（含本次交易）占公司最近期財務報表中總資產及歸屬
+於母公司業主之權益之比例暨最近期財務報表中營運資金數額（註二）:
+不適用
+16.經紀人及經紀費用:
+無
+17.取得或處分之具體目的或用途:
+策略投資
+18.本次交易表示異議董事之意見:
+無
+19.本次交易為關係人交易:否
+20.監察人承認或審計委員會同意日期:
+不適用
+21.本次交易會計師出具非合理性意見:否
+22.會計師事務所名稱:
+安得仕聯合會計師事務所
+23.會計師姓名:
+成昀達
+24.會計師開業證書字號:
+金管會證字第5720號
+25.是否涉及營運模式變更:否
+26.營運模式變更說明:
+不適用
+27.過去一年及預計未來一年內與交易相對人交易情形:
+不適用
+28.資金來源:
+自有資金
+29.前已就同一件事件發布重大訊息日期: 不適用
+30.其他敘明事項:
+無",https://mops.twse.com.tw/
+2026-11-17 16:56:00,台股,證交所重大訊息,3711,"日月光投控：代子公司台灣福雷電子(股)公司公告
+向帆宣系統科技股份有限公司取得供營業用之廠務工程","1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
+供營業用之廠務工程
+2.事實發生日:115/10/16~115/11/17
+3.董事會通過日期: 不適用
+4.其他核決日期:
+核決層級:總經理核決
+民國115年11月17日
+5.交易單位數量（如ＸＸ平方公尺，折合ＸＸ坪）、每單位價格及交易總金額:
+交易數量：一批
+每單位價格計：新台幣497,884仟元(未稅)
+累計交易總金額計：新台幣497,884仟元(未稅)
+6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之關
+係人者，得免揭露其姓名）:
+交易相對人：帆宣系統科技股份有限公司
+與公司之關係：無
+7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移轉之
+所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次移轉日期
+及移轉金額:
+不適用
+8.交易標的最近五年內所有權人曾為公司之關係人者，尚應公告關係
+人之取得及處分日期、價格及交易當時與公司之關係:
+不適用
+9.預計處分利益（或損失）（取得資產者不適用）（遞延者應列表說明
+認列情形）:
+不適用
+10.交付或付款條件（含付款期間及金額）、契約限制條款及其他重要約定
+事項:
+交付或付款條件：電匯或信用狀付款
+契約限制條款：無
+其他重要約定事項：無
+11.本次交易之決定方式（如招標、比價或議價）、價格決定之參考依據及
+決策單位:
+交易之決定方式及價格決定之參考依據：比價及議價
+決策單位：依該公司核決權限規定辦理。
+12.專業估價者事務所或公司名稱及其估價金額:
+不適用
+13.專業估價師姓名:
+不適用
+14.專業估價師開業證書字號:
+不適用
+15.估價報告是否為限定價格、特定價格或特殊價格:否或不適用
+16.是否尚未取得估價報告:否或不適用
+17.尚未取得估價報告之原因:
+不適用
+18.估價結果有重大差異時，其差異原因及會計師意見:
+不適用
+19.會計師事務所名稱:
+不適用
+20.會計師姓名:
+不適用
+21.會計師開業證書字號:
+不適用
+22.經紀人及經紀費用:
+無
+23.取得或處分之具體目的或用途:
+供生產及營運用
+24.本次交易表示異議之董事之意見:
+不適用
+25.本次交易為關係人交易:否
+26.監察人承認或審計委員會同意日期:
+不適用
+27.本次交易係向關係人取得不動產或其使用權資產:否
+28.依「公開發行公司取得或處分資產處理準則」第十六條規定
+評估之價格:不適用
+29.依前項評估之價格較交易價格為低者，依同準則第十七條規
+定評估之價格:不適用
+30.前已就同一件事件發布重大訊息日期: 不適用
+31.其他敘明事項:
+無",https://mops.twse.com.tw/
+2026-11-17 16:53:00,台股,證交所重大訊息,3711,日月光投控：代子公司矽品精密工業(股)公司公告取得營業用機器設備達十億元,"1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
+營業用機器設備
+2.事實發生日:115/6/29~115/11/17
+3.董事會通過日期: 不適用
+4.其他核決日期:
+核決層級:總經理核決
+民國115年11月17日
+5.交易單位數量（如ＸＸ平方公尺，折合ＸＸ坪）、每單位價格及交易總金額:
+取得14批，
+每批平均單價：NTD 82,026,357元，
+交易總金額：NTD 1,148,369,000元。
+6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之關
+係人者，得免揭露其姓名）:
+交易相對人：佳宸科技股份有限公司； 
+與公司之關係：無
+7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移轉之
+所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次移轉日期
+及移轉金額:
+不適用
+8.交易標的最近五年內所有權人曾為公司之關係人者，尚應公告關係
+人之取得及處分日期、價格及交易當時與公司之關係:
+不適用
+9.預計處分利益（或損失）（取得資產者不適用）（遞延者應列表說明
+認列情形）:
+不適用
+10.交付或付款條件（含付款期間及金額）、契約限制條款及其他重要約定
+事項:
+電匯。
+契約限制條款：無。
+其他重要約定事項：無。
+11.本次交易之決定方式（如招標、比價或議價）、價格決定之參考依據及
+決策單位:
+交易決定方式：比價/議價。
+價格決定之參考依據：參考歷年交易資料和市場行情。
+決策單位：依公司內部核決權限決定。
+12.專業估價者事務所或公司名稱及其估價金額:
+不適用
+13.專業估價師姓名:
+不適用
+14.專業估價師開業證書字號:
+不適用
+15.估價報告是否為限定價格、特定價格或特殊價格:否或不適用
+16.是否尚未取得估價報告:否或不適用
+17.尚未取得估價報告之原因:
+不適用
+18.估價結果有重大差異時，其差異原因及會計師意見:
+不適用
+19.會計師事務所名稱:
+不適用
+20.會計師姓名:
+不適用
+21.會計師開業證書字號:
+不適用
+22.經紀人及經紀費用:
+無
+23.取得或處分之具體目的或用途:
+營業用途
+24.本次交易表示異議之董事之意見:
+無
+25.本次交易為關係人交易:否
+26.監察人承認或審計委員會同意日期:
+不適用
+27.本次交易係向關係人取得不動產或其使用權資產:否
+28.依「公開發行公司取得或處分資產處理準則」第十六條規定
+評估之價格:不適用
+29.依前項評估之價格較交易價格為低者，依同準則第十七條規
+定評估之價格:不適用
+30.前已就同一件事件發布重大訊息日期: 不適用
+31.其他敘明事項:
+無",https://mops.twse.com.tw/
+2026-11-17 14:11:00,台股,證交所重大訊息,2303,聯電：本公司受邀參與法人說明會相關資訊,"符合條款第四條第XX款：12
+事實發生日：115/11/23
+1.召開法人說明會之日期：115/11/23 ~ 115/11/24
+2.召開法人說明會之時間：09 時 00 分 
+3.召開法人說明會之地點：台北W飯店
+4.法人說明會擇要訊息：本公司受邀參加花旗證券舉辦之法人說明會「2026 Taiwan Corporate Day」。
+5.其他應敘明事項：無
+完整財務業務資訊請至公開資訊觀測站之法人說明會一覽表或法說會項目下查閱。",https://mops.twse.com.tw/
+2026-11-17 13:40:00,台股,證交所重大訊息,3711,日月光投控：公告本公司將受邀參加「Morgan Stanley Annual Asia Pacific Summit」之法說訊息,"符合條款第四條第XX款：12
+事實發生日：115/11/18
+1.召開法人說明會之日期：115/11/18 ~ 115/11/19
+2.召開法人說明會之時間：09 時 30 分 
+3.召開法人說明會之地點：新加坡文華東方酒店
+4.法人說明會擇要訊息：無。
+5.其他應敘明事項：簡報檔內容與115年10月29日召開之法人說明會相同。
+完整財務業務資訊請至公開資訊觀測站之法人說明會一覽表或法說會項目下查閱。",https://mops.twse.com.tw/
 2026-11-17 12:56:26,美股,AFP,NVDA,US to close AI chip loophole after Nvidia scandal,"The United States announced tougher export control measures on AI chips Monday, after a scandal ensnaring Nvidia co-founder Jensen Huang exposed a loophole allegedly exploited by Chinese companies.The woman, Alice Huang, is a former executive of Megaspeed -- a Singapore-based cloud computing firm under US criminal investigation for allegedly helping Chinese companies procure advanced Nvidia AI chips in violation of export controls.",https://finance.yahoo.com/technology/ai/articles/nvidia-earnings-test-ai-boom-014359078.html
 2026-11-17 12:55:27,台股,鉅亨網,6461,〈焦點股〉益得吸入劑獲經濟部補助1.47億元 亮燈漲停,,https://news.cnyes.com/news/id/6664949
 2026-11-17 12:54:46,美股,Reuters,NVDA,US to curb China's access to AI chips as Trump heads to Asia,"WASHINGTON, Nov 16 (Reuters) - The Trump administration said on Monday it would further restrict China’s access to advanced AI chips from companies like Nvidia, tightening controls as President Donald Trump headed to China for talks with President Xi Jinping. The effort by the Commerce Department to crack down on overseas data centers and chip smuggling comes amid ‌growing scrutiny of whether the department has been doing enough to keep sensitive technology from China.",https://finance.yahoo.com/news/us-curb-chinas-access-ai-220054158.html
