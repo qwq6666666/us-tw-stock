@@ -1,4 +1,163 @@
 ﻿time,market,source,ticker,title,summary,url
+2026-11-20 11:54:48,美股,Stocktwits,NVDA,"Why Did NVDA, NIO, ONDS Stocks Tumble To 52-Week Lows Today?","Investors were concerned about regulatory uncertainty, weakening vehicle sales and rising financing risks despite strong revenues.",https://stocktwits.com/news-articles/markets/equity/why-did-nvda-nio-onds-stocks-tumble-to-52-week-lows-today/cNbSTZCR9Kc
+2026-11-20 11:53:31,美股,Investor's Business Daily,NVDA,"Dow Jones Futures: Techs Slide, Anthropic Retreats After Ugly Market Reversal To New Lows","Tech futures fell after the market suffered an ugly reversal, with the S&P 500 and Nasdaq hitting new lows. Anthropic retreated late after rising its IPO debut.",https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-market-reversal-anthropic-ipo-debuts-amd-dives/?src=A00220&yptr=yahoo
+2026-11-20 11:51:04,美股,24/7 Wall St.,TSM,"South Korea’s Stock Market and the Nikkei 225 Sink More Than 4% as the AI Selloff Spreads From Wall Street. Here’s How Much of a Target-Date Fund Is in Samsung, SK Hynix and TSMC","South Korea's KOSPI and Japan's Nikkei 225 both sank more than 4% on Friday as Wall Street's AI selloff spread to Asia. Samsung, SK hynix and TSMC are about 1.7% of a 2030 target-date fund, and South Korea is 1.38%, so the Seoul drop comes to about $348 on a $500,000 balance.",https://247wallst.com/investing/2026/11/19/south-koreas-stock-market-and-the-nikkei-225-sink-more-than-4-as-the-ai-selloff-spreads-from-wall-street-heres-how-much-of-a-target-date-fund-is-in-samsung-sk-hynix-and-tsmc/
+2026-11-20 11:50:06,美股,鉅亨網,,黑色星期五！Anthropic IPO不夠力衝擊AI信仰　全球股災將創近三年最長跌勢紀錄,Anthropic周四以83美元登陸美股，開盤衝111.50美元後回落收97美元，但引發全球資產去風險風暴。&#10;超微遭指控向黑名單企業供應晶片韌體更新，股價重挫逾9%，拖累晶片及AI族群。&#10;那指收跌2.25%、標普跌2%，亞太股市周五續殺；負Gamma、0DTE與月度選擇權到期受關注。,https://news.cnyes.com/news/id/6668566
+2026-11-20 11:50:06,美股,鉅亨網,"MU,SNDK,DELL,NVDA,PLTR,TRV,SYY",AI下一波贏家藏在傳產？傳奇投資人轉向應用端 四大產業受關注,,https://news.cnyes.com/news/id/6668107
+2026-11-20 11:41:59,台股,鉅亨網,"6223,6683,6515,3443,6531,6462",盤中速報 - 集中市場加權指數下跌-2222.53點至36204.36點，跌幅5.78%,,https://news.cnyes.com/news/id/6668759
+2026-11-20 11:41:57,台股,鉅亨網,"6223,6683,6515,3443,6531,6462",盤中速報 - 櫃買市場加權指數下跌-21.13點至264.2點，跌幅7.41%,,https://news.cnyes.com/news/id/6668758
+2026-11-20 11:41:08,美股,24/7 Wall St.,TSM,Nikkei 225 Falls 4.5% and SoftBank Plunges 15% as Wall Street’s AI Selloff Puts Asian Stocks on Track for Their Worst Week Since 2020,"The Nikkei 225 fell 4.5% in Friday's morning session and SoftBank plunged 15% as Wall Street's AI selloff reached Asia. Taiwan lost 10% in two sessions. Here is what fell most, why, and what it means for U.S. holders of Asia funds.",https://247wallst.com/investing/2026/11/19/nikkei-225-falls-4-5-and-softbank-plunges-15-as-wall-streets-ai-selloff-puts-asian-stocks-on-track-for-their-worst-week-since-2020/
+2026-11-20 11:40:59,台股,鉅亨網,"6223,6683,6515,3443,6531,6462",盤中速報 - 集中市場加權指數下跌-2250.63點至36176.26點，跌幅5.86%,,https://news.cnyes.com/news/id/6668756
+2026-11-20 11:40:55,台股,鉅亨網,"6223,6683,6515,3443,6531,6462",盤中速報 - 櫃買市場加權指數下跌-21.37點至263.96點，跌幅7.49%,,https://news.cnyes.com/news/id/6668755
+2026-11-20 11:18:30,美股,Investing.com,NVDA,SpaceX lenders seek safeguards against Musk sending AI chips into space - FT,"Investing.com-- Lenders backing SpaceX's (NASDAQ:SPCX) latest $43 billion debt package have sought safeguards to prevent Elon Musk from sending the advanced Nvidia chips securing the financing into space, the Financial Times reported on Thursday.",https://finance.yahoo.com/technology/ai/articles/spacex-lenders-seek-safeguards-against-031830082.html
+2026-11-20 11:17:50,美股,Simply Wall St.,AAPL,Apple (AAPL) Stock Could Be 33% Overvalued On Fresh Service Outage Concerns,"Apple has delivered a long stretch of strong share-price gains, and with the stock recently closing at US$349.21, the real question for investors is how well that market value lines up with the cash the business can generate. With a Discounted Cash Flow (DCF) intrinsic value estimate in hand, the focus turns to whether the current price makes sense once you trace those cash streams over time. Over the past 5 years, Apple has returned 120.9%, which puts a lot of accumulated optimism on the...",https://finance.yahoo.com/markets/stocks/articles/apple-aapl-stock-could-33-031750121.html
+2026-11-20 11:13:18,台股,鉅亨網,,〈房產〉房市雖冷但今年來六都住宅大樓價格全上漲  北市以上漲8.8%奪魁,"六都1-10月住宅大樓平均總價全面年增，台北市4,091.7萬升至4,451萬，年增8.8%最多。&#10;公寓走勢相反，六都4都平均成交總價下滑，台中市年減26.3%最深，台北持平、高雄僅增0.6%。&#10;業者指信用管制、貸款緊縮使房價分化；自住客偏好電梯與社區管理，大樓有支撐，公寓、華廈議價空間較大。",https://news.cnyes.com/news/id/6668722
+2026-11-20 11:10:05,美股,鉅亨網,,有一種友誼叫黃仁勳與馬斯克,馬斯克在《紐約時報》DealBook 峰會稱黃仁勳是老朋友，公開力挺。&#10;兩人交情可追溯至 2016 年黃仁勳親送 DGX-1 給 OpenAI，2025 年再把 DGX Spark 交給馬斯克。&#10;黃仁勳曾讚 xAI 19 天部署大型 GPU 叢集超乎常人，馬斯克也曾在餐桌上向他「求晶片」。,https://news.cnyes.com/news/id/6666526
+2026-11-20 11:03:35,台股,鉅亨網,,龍山寺和紅樓都裝光電板、故宮不行？經部次長親上火線還原始末,賴建信澄清，故宮已發文說明未裝設太陽能光電板，經濟部先前發函僅為例行普查。&#10;公文已提醒留意文化資產，並無強制要求故宮裝設，屬資料盤點性質。&#10;屋頂型、地面型、水庫型光電案場均須嚴謹普查與專家評估，古蹟施工不會貿然進行。,https://news.cnyes.com/news/id/6668704
+2026-11-20 11:02:57,美股,AFP,NVDA,Tech takes a beating as AI trade comes unstuck despite Anthropic surge,"Tech firms led losses across Asia once again Friday as Anthropic's sparkling debut failed to muster a recovery in sentiment towards the AI trade, with nerves frayed by worries over crisis-hit Nvidia, profitability and regulation.""Whether Anthropic's IPO proves to be a defining moment for the AI trade remains to be seen.",https://finance.yahoo.com/markets/stocks/articles/tech-takes-beating-ai-trade-030257717.html
+2026-11-20 11:01:01,美股,鉅亨網,,史上最尷尬IPO？Anthropic上市首日大漲17%　卻遭矽谷聯合抵制,Anthropic於19日開盤111.5美元較83美元發行價漲34.34%，盤中市值一度破1.5兆美元，收盤漲幅收斂至17.07%&#10;Anthropic去年營收45.85億美元，今年前三季332.42億；但長期算力承諾約9009億，接近去年營收兩百倍&#10;上市引發安全爭議，矽谷同日質疑其並非安全AI公司。,https://news.cnyes.com/news/id/6668235
+2026-11-20 11:00:00,美股,The Wall Street Journal,NVDA,China’s AI Firms Are Addicted to Nvidia Chips. Now They Are Facing Withdrawal.,The move by the U.S. to cut off Chinese access to high-end computing power has dealt a blow to Beijing’s AI ambitions.,https://www.wsj.com/tech/ai/chinas-ai-firms-are-addicted-to-nvidia-chips-now-they-are-facing-withdrawal-ba851ca9?siteid=yhoof2&yptr=yahoo
+2026-11-20 10:56:52,台股,鉅亨網,,台電中油追加預算卡關？藍委傳喊電價凍漲2年 經濟部給答案了,經濟部今赴立法院國民黨團，說明台電、中油115年度追加減預算案與撥補、增資計畫，盼爭取國會支持&#10;外傳藍委要求若放行撥補，需承諾未來2年電價、油價全面凍漲；賴建信未正面證實，稱尊重黨團內部討論&#10;賴建信否認會中氣氛激烈，強調已向委員完整報告，感謝國民黨團提供溝通機會,https://news.cnyes.com/news/id/6668691
+2026-11-20 10:49:25,台股,鉅亨網,,〈國泰金經濟調查〉通膨升溫+AI疑慮再起 11月景氣、股市樂觀指數同步回落,國泰金11月國民經濟信心調查顯示，景氣現況樂觀指數降至-6.3、展望樂觀指數降至-1.0。&#10;大額消費意願降至12.1、耐久財消費意願降至-9.1；台股樂觀指數降至29.8、風險偏好指數降至26.5。&#10;62%民眾有投資債券ETF，45%未來一年維持部位，近五成傾向加碼。,https://news.cnyes.com/news/id/6668589
+2026-11-20 10:48:14,美股,Stocktwits,NVDA,"Nasdaq, Dow, S&P 500 Futures Slip As Anthropic’s Record Debut Fails To Lift AI Stocks: SLV, GLD, AMD, NVDA In Focus",Anthropic has quickly become one of the most valuable public companies in the world after its shares began trading much above its allocation price of $83.,https://stocktwits.com/news-articles/markets/equity/why-nasdaq-dow-futures-fell-anthropic-ipo-ai-trade-amd-nvda/cNbSGu0R9KR
+2026-11-20 10:46:42,台股,鉅亨網,9941,微型金融違約增加 裕融：增提備抵 資產品質穩健可控,裕融企金受企業融資與微型金融違約增加影響，台灣延滯率回升至1.65%；公司已增提備抵，稱部分大型違約屬實質無損。&#10;中國延滯率降至2.25%，前三季營業利益1.58億元、年增逾1倍，東南亞投資貢獻也逐步放大。,https://news.cnyes.com/news/id/6668632
+2026-11-20 10:39:55,台股,鉅亨網,"3443,6531,8054,3228",盤中速報 - 集中市場加權指數下跌-2270.5點至36156.39點，跌幅5.91%,,https://news.cnyes.com/news/id/6668594
+2026-11-20 10:39:53,台股,鉅亨網,"3443,6531,8054,3228",盤中速報 - 櫃買市場加權指數下跌-21.97點至263.36點，跌幅7.7%,,https://news.cnyes.com/news/id/6668593
+2026-11-20 10:37:33,台股,鉅亨網,"3443,3653,6223,2345,2330",台股湧多殺多無差別賣壓 國家隊死守台積電2000元、台幣33元防線,台股今盤中重挫逾2200點，跌破38000、37000點，跌停約300家，新台幣最低見33.04元。&#10;千金股創意、健策、旺矽、智邦跌停，台積電拚守2000元。&#10;Anthropic首日大漲仍難解AI獲利與融資疑慮。,https://news.cnyes.com/news/id/6668587
+2026-11-20 10:34:16,台股,鉅亨網,"6223,6683,6515,3055,8027,3580",盤中速報 - 櫃買市場加權指數下跌-20.44點至264.89點，跌幅7.16%,,https://news.cnyes.com/news/id/6668585
+2026-11-20 10:30:04,美股,鉅亨網,"NVDA,AVGO,SPCX,SPCX",〈分析〉14.5倍明年營收估值貴過SpaceX Anthropic上市狂歡能撐多久？,Anthropic上市開盤大漲34%，完全稀釋估值一度突破2兆美元，達明年預估營收14.5倍。&#10;Ramp追蹤企業的Anthropic Token支出月增僅3%，營業利益率也從第二季8%轉為第三季負3%。&#10;公司承諾約9000億美元算力支出，超過700億美元將於未來12個月到期，獲利能力面臨考驗。,https://news.cnyes.com/news/id/6668447
+2026-11-20 10:24:01,美股,Motley Fool,NVDA,IBM Stock Is Down About 23% in 2026. Here's Where I Think It Will Be in 2030.,Can a software comeback and an ordinary valuation bring the stock back near its old peak?,https://www.fool.com/investing/2026/11/19/ibm-stock-is-down-about-23-in-2026-here-s-where-i-think-it-will-be-in-2030/
+2026-11-20 10:23:38,台股,鉅亨網,1215,2027卜蜂「年菜金選」重磅登場 官網獨家優惠88折起,卜蜂食品購物網宣布2027「年菜金選」預購開跑，早鳥優惠88折起，主打拆封加熱即食、強調高CP值。&#10;今年推出全新菜色「鴻運滷元蹄」、「法式奶蒜豬小排」，並有福氣7件組、團圓10件組、尊爵11件組等宅配年菜。&#10;,https://news.cnyes.com/news/id/6668565
+2026-11-20 10:17:51,台股,鉅亨網,"6223,6683,6515,3055,8027,3580",盤中速報 - 櫃買市場加權指數下跌-20.78點至264.55點，跌幅7.28%,,https://news.cnyes.com/news/id/6668573
+2026-11-20 10:17:46,台股,鉅亨網,"6223,6683,6515,3055,8027,3580",盤中速報 - 集中市場加權指數下跌-1941.04點至36485.85點，跌幅5.05%,,https://news.cnyes.com/news/id/6668571
+2026-11-20 10:06:58,台股,鉅亨網,"6223,6683,6515,3055,8027,3580",盤中速報 - 櫃買市場加權指數下跌-21.66點至263.67點，跌幅7.59%,,https://news.cnyes.com/news/id/6668559
+2026-11-20 10:00:28,美股,鉅亨網,KEYS,AI光模組放量帶動測試需求是德科技第4季接單年增53%,,https://news.cnyes.com/news/id/6668530
+2026-11-20 10:00:28,美股,鉅亨網,"NEE,D",美國司法部結束反壟斷調查NextEra收購Dominion仍待多關審查,,https://news.cnyes.com/news/id/6668529
+2026-11-20 09:51:41,台股,鉅亨網,"3055,8027,3189,6223,6683,6515",盤中速報 - 集中市場加權指數下跌-1977.84點至36449.05點，跌幅5.15%,,https://news.cnyes.com/news/id/6668455
+2026-11-20 09:51:35,台股,鉅亨網,"3055,8027,3189,6223,6683,6515",盤中速報 - 櫃買市場加權指數下跌-21.04點至264.29點，跌幅7.37%,,https://news.cnyes.com/news/id/6668452
+2026-11-20 09:50:04,美股,鉅亨網,,一週內連破四道關卡！受Fed鷹派信號+AI股續跌影響　現貨金價跌破3600美元　,現貨金價今早跌破每盎司3600美元，較年初高點5596美元跌近2000美元，今年累跌近36%&#10;Fed釋放鷹派信號，美國12月升息1碼機率升至96.4%，推高美債殖利率&#10;AI股票下跌促使投資者賣黃金彌補損失，白銀價格亦跌約13%,https://news.cnyes.com/news/id/6668416
+2026-11-20 09:48:02,美股,Motley Fool,AAPL,"History Says This Brilliant ETF Could Help You Turn $500 Per Month Into $784,100 While Barely Lifting a Finger.",Compound earnings can do a lot of heavy lifting.,https://www.fool.com/investing/2026/11/19/history-says-this-brilliant-etf-could-help-you-turn-usd500-per-month-into-usd784-100-while-barely-lifting-a-finger/
+2026-11-20 09:30:18,台股,鉅亨網,"2330,2454,2408,3006,6274,6213,3661,3035,3443,2382,2317,3711,2308,3081",〈台股開盤〉台積電重挫3%逾百檔個股跌停 賣壓擴大早盤跌逾1500點失守3萬7,,https://news.cnyes.com/news/id/6668393
+2026-11-20 09:29:34,台股,鉅亨網,"6683,6515,3653,3163,3450,4979",盤中速報 - 集中市場加權指數下跌-1532.87點至36894.02點，跌幅3.99%,,https://news.cnyes.com/news/id/6668423
+2026-11-20 09:29:32,台股,鉅亨網,"6683,6515,3653,3163,3450,4979",盤中速報 - 櫃買市場加權指數下跌-18.31點至267.02點，跌幅6.42%,,https://news.cnyes.com/news/id/6668422
+2026-11-20 09:26:22,台股,鉅亨網,"6683,3653,6217,3163,3450,4979",盤中速報 - 櫃買市場加權指數下跌-18.28點至267.05點，跌幅6.41%,,https://news.cnyes.com/news/id/6668421
+2026-11-20 09:24:43,台股,鉅亨網,"6683,3653,6217,3163,3450,4979",盤中速報 - 櫃買市場加權指數下跌-18.25點至267.08點，跌幅6.4%,,https://news.cnyes.com/news/id/6668420
+2026-11-20 09:23:26,台股,鉅亨網,"6683,3653,6217,3163,3450,4979",盤中速報 - 櫃買市場加權指數下跌-18點至267.33點，跌幅6.31%,,https://news.cnyes.com/news/id/6668418
+2026-11-20 09:23:22,台股,鉅亨網,"6683,3653,6217,3163,3450,4979",盤中速報 - 集中市場加權指數下跌-1452.56點至36974.33點，跌幅3.78%,,https://news.cnyes.com/news/id/6668417
+2026-11-20 09:16:24,台股,鉅亨網,4904,遠傳新創加速器4年育成48家新創 助攻取得投資金額逾7.8億元,,https://news.cnyes.com/news/id/6667944
+2026-11-20 09:15:47,台股,鉅亨網,"3163,3450,4979",盤中速報 - 集中市場加權指數下跌-1614.17點至36812.72點，跌幅4.2%,,https://news.cnyes.com/news/id/6668369
+2026-11-20 09:15:37,台股,鉅亨網,"3163,3450,4979",盤中速報 - 櫃買市場加權指數下跌-18.83點至266.5點，跌幅6.6%,,https://news.cnyes.com/news/id/6668367
+2026-11-20 09:05:35,台股,鉅亨網,"6217,6515,3653,3406,6209,3504",盤中速報 - 集中市場加權指數下跌-1538.72點至36888.17點，跌幅4%,,https://news.cnyes.com/news/id/6668287
+2026-11-20 09:00:11,美股,鉅亨網,,Anthropic、SpaceX相繼在那斯達克掛牌大型新股可望提前迎來ETF買盤,,https://news.cnyes.com/news/id/6668243
+2026-11-20 08:52:02,美股,Motley Fool,AAPL,1 Unstoppable Stock to Buy Before It Joins NVDA and AAPL in the $1 Trillion Club,AMD looks poised to reclaim a $1 trillion market cap as Nvidia turmoil creates an opportunity.,https://www.fool.com/investing/2026/11/19/1-unstoppable-stock-to-buy-before-it-joins-hot-tickers-in-the-1-3-trillion-club/
+2026-11-20 08:50:10,美股,鉅亨網,,IPO是表面利多！彭博經濟學家曝1指標警告：Anthropic IPO定價權正流失 AI行情恐終結,彭博經濟學家Anna Wong說，Anthropic IPO更像AI行情「最後一波燃料」，非新一輪上漲起點&#10;9月以來Anthropic每百萬token實際價格大幅下滑，token使用量增但市占略降，顯示定價權有限&#10;Wong稱上市後定價、利潤率與資本回報將受檢驗，若業績不如估值預期，AI板塊估值恐回吐,https://news.cnyes.com/news/id/6668224
+2026-11-20 08:41:17,美股,鉅亨網,AMZN,劍指輝達！亞馬遜傳70億美元洽購Decart 強化自研晶片戰力,亞馬遜收購AI新創Decart談判近完成，交易金額逾70億美元，最快11月26日前敲定。&#10;Decart軟體可讓AI模型在輝達、Google與亞馬遜晶片上更快運行，並降低切換門檻，強化Trainium競爭力。&#10;交易由Nafea Bshara主導，Decart今年5月估值40億美元，創辦人同意留任5年。,https://news.cnyes.com/news/id/6668220
+2026-11-20 08:30:07,美股,鉅亨網,"TSM,AVGO,AMZN,GOOGL,NVDA,MSFT,AAPL,SPCX,SPCX",Anthropic掛牌首日大漲17%！市值衝上1.8兆美元空降全球第七大 緊追SpaceX,"Anthropic周四那斯達克首日漲17%，以1.8兆美元市值躋身全球第七大企業。&#10;Anthropic周三以每股83美元發行9.8億股，募資813億美元，創史上最大IPO。&#10;成立僅五年的Claude開發商，9個月營收332.4億美元、年增1,200%，但AI安全與監管立場遭批評。",https://news.cnyes.com/news/id/6668173
+2026-11-20 08:30:06,美股,鉅亨網,GRRR,Gorilla Technology營收大增163%仍轉虧印度算力案明年首季估擴大計費,,https://news.cnyes.com/news/id/6668228
+2026-11-20 08:10:03,美股,鉅亨網,PLTR,科技圈接連爆間諜疑雲！Palantir援烏遭俄籍間諜鎖定滲透,美國司法部起訴俄籍男子 Igor D’iu，涉共謀外國政府代理人、詐欺及跟蹤，鎖定 Palantir 蒐集情報。&#10;檢方指 D’iu 偷拍員工螢幕、尾隨女員工近48公里，並整理10名員工住址與家屬背景。&#10;Palantir 未遭入侵、未外洩資料；事件凸顯援烏科技公司成俄方情報目標。,https://news.cnyes.com/news/id/6666772
+2026-11-20 08:06:31,美股,IntelliNews,TSM,TSMC halts advanced chip orders from Chinese designers in Taiwan,"Taiwan Semiconductor Manufacturing Co (TSMC, TWSE: 2330) has suspended some advanced production orders from Chinese chip designers and will largely restrict those clients to older technology, Taipei Times reported on November 20, citing two sources with knowledge of the matter. The move follows new US export rules that came into force on November 19.",http://www.intellinews.com/tsmc-halts-advanced-chip-orders-from-chinese-designers-in-taiwan-486911/
+2026-11-20 08:01:21,美股,鉅亨網,"GOOGL,AMZN",Anthropic上市牽動科技巨頭財報投資損益讓每股盈餘大起大落,,https://news.cnyes.com/news/id/6668188
+2026-11-20 08:01:20,美股,鉅亨網,TSLA,特斯拉董事改選掀爭議兩家顧問建議反對董事長連任,,https://news.cnyes.com/news/id/6668185
+2026-11-20 08:01:20,美股,鉅亨網,P,NAND成本還在漲Everpure靠設計與軟體改善轉向降價,,https://news.cnyes.com/news/id/6668187
+2026-11-20 08:01:20,美股,鉅亨網,,日本投資人搶購Anthropic IPO申購意願逾1.5兆日圓,,https://news.cnyes.com/news/id/6668186
+2026-11-20 08:01:19,美股,鉅亨網,MGA,汽車零組件廠麥格納瞄準資料中心機櫃跨界業務目標2030年達20億美元,,https://news.cnyes.com/news/id/6668183
+2026-11-20 08:01:19,美股,鉅亨網,"NVDA,MU,AVGO,CRWV,NBIS,PANW,WMT","美股收盤／道瓊重挫1,101點Anthropic掛牌收漲17%，AI股仍走弱",,https://news.cnyes.com/news/id/6668184
+2026-11-20 08:01:18,美股,鉅亨網,SPWR,SunPower擴大住宅虛擬電廠德州模式推向伊利諾與加州,,https://news.cnyes.com/news/id/6668182
+2026-11-20 08:00:54,美股,鉅亨網,"AMD,MU,INTC",美股重點新聞摘要2026年11月20日,,https://news.cnyes.com/news/id/6667052
+2026-11-20 07:51:00,美股,Barrons.com,AAPL,Apple May Try to Challenge Meta for Personal Agent Supremacy,"Apple has been posting job openings that reveal its interest in agents, but a new one this week was pretty explicit about what Apple is working toward.",https://www.barrons.com/articles/apple-meta-siri-muse-ai-82985299?siteid=yhoof2&yptr=yahoo
+2026-11-20 07:50:05,美股,鉅亨網,AAPL,《彭博》：蘋果搶攻AI代理 擬最快明年底推出,蘋果正開發自主 AI 代理，最快 2027 年底推出。&#10;蘋果徵才揭露計畫，目標讓 AI 跨瀏覽器、命令列、API 等多步驟協作，並強調隱私、權限與沙盒隔離。&#10;蘋果同時收緊第三方 AI 控制 Mac 權限，盤後 Meta、Anthropic 走低，AI 代理競爭升溫。,https://news.cnyes.com/news/id/6668154
+2026-11-20 07:40:04,美股,鉅亨網,"MATX,JBHT,WMT,GAP",洛杉磯、長灘港250名保全醞釀罷工 馬士基等四大航商恐受衝擊,"洛杉磯港與長灘港約250名保全合約21日到期，最快凌晨罷工，恐帶動其他工會拒進場，衝擊兩港作業。&#10;PMA稱保全平均年薪17萬美元，提1次性3,200美元獎金與調薪至19.8萬美元。&#10;若停工將阻礙卸貨，影響航運與零售，年底旺季物流受壓，馬士基、J.B. Hunt、WMT等都可能受波及。",https://news.cnyes.com/news/id/6668105
+2026-11-20 07:30:21,美股,鉅亨網,"AMZN,GOOGL,NVDA",Anthropic 上市首日大漲17%！史上最大 IPO 的「高光與裂痕」華爾街多空激辯交鋒,Anthropic IPO認購訂單近發行股數7倍，估值約1.4兆美元，市場高度追捧。&#10;艾斯曼認為，資料中心建設若放緩10%至30%，反而有利大型雲端業者降低融資壓力。&#10;他警告，CoreWeave、Nebius等業者高度依賴外部融資，AI基礎設施資金鏈才是關鍵風險。,https://news.cnyes.com/news/id/6668162
+2026-11-20 07:20:04,美股,鉅亨網,,加州檢察長向輝達「發傳票」 追查先進晶片是否違規流入中國,加州檢察長邦塔辦公室向輝達發出調查傳票，查先進晶片是否違反美國出口限制流入中國。&#10;調查也聚焦輝達或黃仁勳是否讓中國取得晶片或機密資訊，並就風險誤導投資人與公眾。&#10;輝達已設常設國安與出口管制監督委員會；另傳SEC也就資訊揭露展開民事調查。,https://news.cnyes.com/news/id/6668159
+2026-11-20 07:10:03,美股,鉅亨網,,小摩：iPhone 18 Pro買氣意願高漲！iPhone Duo吸引安卓用戶跳槽,摩根大通調查：iPhone 18 Pro/Pro Max與摺疊機iPhone Duo帶動新iPhone購買意願升至近年高點。&#10;有意購買新iPhone者中，73%計畫於2026年入手。&#10;Pro機型最受青睞，iPhone Duo在美國吸引23%轉換陣營者；HomeView中國購買意願也升溫。,https://news.cnyes.com/news/id/6666527
+2026-11-20 07:01:05,美股,Stocktwits,AAPL,"S&P 500, Nasdaq, Dow End Lower As Anthropic Trading Debut Fails To Provide Adequate Confidence —  ANT, META, AAPL, GME In Focus",Anthropic closed its debut trading session 17% higher from its listing price of $83 a share.,https://stocktwits.com/news-articles/markets/equity/s-and-p-500-nasdaq-dow-end-lower-as-anthropic-trading-debut-fails-to-provide-adequate-confidence/cNbio2mR90v
+2026-11-20 06:52:44,美股,鉅亨網,"NVDA,AMD",美商務部核准逾87.9萬顆AI晶片銷中 議員質疑「出口管制失靈」,BIS截至2026年5月核准向中國企業出售逾87.9萬顆AI晶片，買家含阿里巴巴、騰訊。&#10;眾院委員會點名Maginfra、New Matrix疑為走私掩護公司，若獲准購買輝達晶片恐涉國安風險。&#10;黃仁勳12月1日將接受閉門詢問，商務部已發布規則堵第三國資料中心租用輝達算力漏洞。,https://news.cnyes.com/news/id/6668138
+2026-11-20 06:40:07,美股,鉅亨網,"MU,NVDA",美光示警：記憶體缺貨恐加劇！2027年75%供應量已售出,"美光警告AI帶動記憶體需求續升，2027、2028年缺貨恐比2026年更嚴重，供需平衡時間未明。&#10;美光已簽26份多年期協議，涵蓋320億美元預付款與財務承諾，2027年供應量已有75%售出。&#10;美光擴產投資逾2,500億美元，並持續與輝達合作HBM4、HBM3E；記憶體成本也壓縮下游客戶毛利。",https://news.cnyes.com/news/id/6668133
+2026-11-20 06:37:00,美股,24/7 Wall St.,AAPL,3 ETFs for the 58-Year-Old Who Opened the 401(k) Brokerage Window and Did Not Know What to Buy,"One click turned a short plan menu into thousands of choices, and a 58-year-old froze. Retirement is close, the stakes are high, and a surprisingly small set of funds may cut through the noise.",https://247wallst.com/investing/etf/2026/11/19/3-etfs-for-the-58-year-old-who-opened-the-401k-brokerage-window-and-did-not-know-what-to-buy/
+2026-11-20 06:30:11,美股,鉅亨網,"NVDA,MU,AVGO,AMD,INTC,COHR,CRWV",Anthropic上市利多曇花一現！輝達、博通、美光吐回漲幅 AI概念股為何再陷賣壓？,Anthropic以每股83美元IPO，周四掛牌開盤111.50美元，終場97.17美元、市值約1.77兆美元。&#10;AI熱潮未延續至整體科技股，輝達、美光、博通回吐漲幅收低，資金轉向新股。&#10;市場憂AI資本支出回報、出口管制與融資成本；超微遭質疑對中出貨，股價跌9.2%。,https://news.cnyes.com/news/id/6668130
+2026-11-20 06:01:52,美股,Stocktwits,AAPL,Anthropic Closes Up 17% While Nasdaq Falls; Mohamed El-Erian Calls It ‘Making Room’ For AI,Anthropic opened on Nasdaq on Thursday at a 34% premium to the offer price of $83 and closed at $97.17.,https://stocktwits.com/news-articles/markets/equity/anthropic-closes-up-17-while-nasdaq-falls-mohamed-el-erian-calls-it-making-room-for-ai/cNbinSRR90u
+2026-11-20 05:54:00,美股,Barrons.com,AAPL,Intuit Stock Tumbles After Earnings Beat. It’s Selling Mailchimp.,Intuit reported better-than-expected fiscal first-quarter earnings.,https://www.barrons.com/articles/intuit-earnings-stock-price-50cb5c01?siteid=yhoof2&yptr=yahoo
+2026-11-20 05:50:00,美股,Zacks,TSM,"Cracks in the ""AI"" Cap-Ex Boom Have Emerged","As a Share Investor, Should You Worry?",https://finance.yahoo.com/technology/ai/articles/cracks-ai-cap-ex-boom-215000924.html
+2026-11-20 05:30:21,美股,Yahoo Finance Video,NVDA,Jensen Huang's Nvidia comeback: Why the math doesn't add up,"Tamalpais Strategies Founder and Principal, Jim Prosser, joins Deirdre Bosa on Deirdre Bosa Live to discuss what it will actually take to bring Jensen Huang back as Nvidia (NVDA) CEO. Although ""vibes"" may be high, Huang's comeback does add up.",https://finance.yahoo.com/video/jensen-huangs-nvidia-comeback-why-the-math-doesnt-add-up-213021034.html
+2026-11-20 05:16:00,美股,Barrons.com,AAPL,Bridgewater Warns of AI Security Risk as Anthropic Shares Rise in Debut,Bridgewater Associates laid out its thinking on artificial intelligence-related risks in a paper published last week.,https://www.barrons.com/livecoverage/ipo-anthropic-claude-stock-price-ticker/card/bridgewater-warns-of-ai-security-risk-as-anthropic-shares-rise-in-debut-RxyAcE5h0W1SgJRON7Zu?siteid=yhoof2&yptr=yahoo
+2026-11-20 03:46:51,美股,24/7 Wall St.,TSM,"Billionaire Stanley Druckenmiller Cut TSMC 94% in One Quarter, Leaving Just $14.9 Million","TSMC's revenue kept surging while one of Wall Street's sharpest macro minds headed for the exit. His new buys in storage, gold and space hint at what spooked him, and his own words about the next 12 months add another clue.",https://247wallst.com/investing/2026/11/19/billionaire-stanley-druckenmiller-cut-tsmc-94-in-one-quarter-leaving-just-14-9-million/
+2026-11-20 03:14:07,美股,Trefis,TSM,What's Happening To Intel's Factory Cash?,Today's big story: Could Anthropic Stock Fall 25.,https://www.trefis.com/stock/intc/articles/626665/what-s-happening-to-intel-s-factory-cash/2026-11-19
+2026-11-20 02:59:54,美股,Yahoo Finance Video,NVDA,Nvidia will not be the leader 5 years from now: Tiernan Ray,"The Technology Letter's Tiernan Ray joins Market Hang to discuss why Nvidia (NVDA) will not be the leader of the AI chip race in 5 years.
+
+Today's panel includes Barron's reporter Jacob Sonenshine, The Technology Letter's Tiernan Ray, Epistrophy Capital Research Chief Market Strategist Cory Johnson, and Laffer Tengler Investments CEO and chief investment officer Nancy Tengler.",https://finance.yahoo.com/video/nvidia-will-not-be-the-leader-5-years-from-now-tiernan-ray-185954396.html
+2026-11-20 02:54:14,美股,GuruFocus.com,TSM,TSMC and Samsung's China Chip Pause Has Stakes Beyond AI,U.S. approvals could determine which orders ship and when.,https://finance.yahoo.com/technology/articles/tsmc-samsungs-china-chip-pause-185414287.html
+2026-11-20 02:48:51,美股,Yahoo Finance Video,NVDA,Why AI competition from China won't be a risk US tech companies,"Host Mark Malek, Siebert Financial's chief investment officer, and his panel of experts weigh in on whether competition from China is a risk to US tech companies.
+
+Today's panel includes Barron's reporter Jacob Sonenshine, The Technology Letter's Tiernan Ray, Epistrophy Capital Research Chief Market Strategist Cory Johnson, and Laffer Tengler Investments CEO and chief investment officer Nancy Tengler.",https://finance.yahoo.com/video/why-ai-competition-from-china-wont-be-a-risk-us-tech-companies-184851467.html
+2026-11-20 02:23:20,美股,Trefis,TSM,$1 Million In Nvidia Five Years Ago: What Is It Worth Now?,Today's big story: Could Anthropic Stock Fall 25.,https://www.trefis.com/stock/nvda/articles/626572/1-million-in-nvidia-five-years-ago-what-is-it-worth-now/2026-11-19
+2026-11-20 02:12:36,美股,Insider Monkey,TSM,Ken Fisher’s Quiet Bet on TSMC (TSM): Owning the AI Boom Without Picking a Winner,"Taiwan Semiconductor Manufacturing Company Limited (NYSE:TSM) took 7th place in our list of the Top 10 Stocks to Buy According to Billionaire Ken Fisher. Ken Fisher has spent more than four decades betting that big, globally dominant companies keep winning, and his latest filing shows he still believes it. Fisher Asset Management, the firm behind […]",https://finance.yahoo.com/markets/stocks/articles/ken-fisher-quiet-bet-tsmc-181236877.html
+2026-11-20 01:45:20,美股,24/7 Wall St.,UMC,Taiwan Semiconductor Slipped 14% This Month Amidst Tech Contraction: 175% Gains to Materialize According to One Wall Street Desk,"Earnings estimates keep climbing while Taiwan Semiconductor's stock sinks with the rest of the chip sector. Is the selloff a warning about AI demand, or a rare entry point that one analyst values at nearly three times today's price?",https://247wallst.com/investing/2026/11/19/taiwan-semiconductor-slipped-14-this-month-amidst-tech-contraction-175-gains-to-materialize-according-to-one-wall-street-desk/
+2026-11-19 22:27:00,美股,Zacks,ASX,PANW Q1 Earnings Beat Estimates on Broad-Based Security Growth,"Palo Alto Networks beats Q1 earnings estimates as revenues surge 39.2%, fueled by broad-based security growth and accelerating platformization adoption.",https://finance.yahoo.com/markets/stocks/articles/panw-q1-earnings-beat-estimates-142700334.html
+2026-11-19 16:09:00,台股,證交所重大訊息,2330,"台積電：代子公司TSMC Partners, Ltd.公告投資Anthropic, PBC(補充115/11/10公告)","1.標的物之名稱及性質（屬特別股者，並應標明特別股約定發行條件，如股息率等）:
+Anthropic, PBC (""Anthropic"") 之N類普通股
+2.事實發生日:115/11/19~115/11/19
+3.董事會通過日期: 民國115年11月10日
+4.其他核決日期: 不適用
+5.交易數量、每單位價格及交易總金額:
+6,024,096股；每股US$83；總金額US$499,999,968
+6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之
+關係人者，得免揭露其姓名）:
+Anthropic；與公司之關係：無。
+7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移
+轉之所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次
+移轉日期及移轉金額:
+不適用
+8.交易標的最近五年內所有權人曾為公司之關係人者，尚應公告關係人之取
+得及處分日期、價格及交易當時與公司之關係:
+不適用
+9.本次係處分債權之相關事項（含處分之債權附隨擔保品種類、處分債權
+如有屬對關係人債權者尚需公告關係人名稱及本次處分該關係人之債權
+帳面金額:
+不適用
+10.處分利益（或損失）（取得有價證券者不適用）（原遞延者應列表說明
+認列情形）:
+不適用
+11.交付或付款條件（含付款期間及金額）、契約限制條款及其他重要約定
+事項:
+一次付清；依美國1933年證券法Rule 144相關規範。
+12.本次交易之決定方式、價格決定之參考依據及決策單位:
+本公司董事會核准投資；交易價格同IPO價格。
+13.取得或處分有價證券標的公司每股淨值:
+0.01元
+14.迄目前為止，累積持有本交易證券（含本次交易）之數量、金額、持股
+比例及權利受限情形（如質押情形）:
+6,024,096股；US$499,999,968；0.03%；無。
+15.迄目前為止，依「公開發行公司取得或處分資產處理準則」第三條所列
+之有價證券投資（含本次交易）占公司最近期財務報表中總資產及歸屬
+於母公司業主之權益之比例暨最近期財務報表中營運資金數額（註二）:
+0.91%；0.94%；NT$325,002佰萬元。
+16.經紀人及經紀費用:
+不適用
+17.取得或處分之具體目的或用途:
+股權投資。
+18.本次交易表示異議董事之意見:
+無
+19.本次交易為關係人交易:否
+20.監察人承認或審計委員會同意日期:
+不適用
+21.本次交易會計師出具非合理性意見:否
+22.會計師事務所名稱:
+揚智聯合會計師事務所
+23.會計師姓名:
+胡湘寧
+24.會計師開業證書字號:
+中市會證字第0191號
+25.是否涉及營運模式變更:否
+26.營運模式變更說明:
+不適用
+27.過去一年及預計未來一年內與交易相對人交易情形:
+不適用
+28.資金來源:
+不適用
+29.前已就同一件事件發布重大訊息日期:
+115年11月10日
+30.其他敘明事項:
+無",https://mops.twse.com.tw/
 2026-11-19 12:10:25,台股,鉅亨網,6782,鉅亨速報 - Factset 最新調查：視陽(6782-TW)目標價調升至324元，幅度約5.88%,,https://news.cnyes.com/news/id/6667371
 2026-11-19 12:07:45,美股,Stocktwits,NVDA,"Anthropic, Nvidia And The Next AI Trade: Michael Burry Explains What Could Break The Bull Case","Burry held $140 Nvidia puts and flagged slower collections. The wait for payment rose from 60 to 64 days, with $81 billion owed.",https://stocktwits.com/news-articles/markets/equity/anthropic-nvidia-next-ai-trade-michael-burry-what-could-break-bull-case/cNbLwugR9ig
 2026-11-19 12:02:55,美股,Investor's Business Daily,NVDA,Dow Jones Futures Rise: Anthropic IPO To Debut After Pricing High; Palo Alto And Everpure Rally On Earnings,"The stock market was mixed as UnitedHealth dived and Nvidia fell. The Anthropic IPO priced high. Palo Alto, Everpure leaped.",https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-anthropic-ipo-prices-palo-alto-everpure-nvidia-target-unitedhealth-fed-waller-shock/?src=A00220&yptr=yahoo
@@ -1025,20 +1184,20 @@ Deirdre Bosa then sits down with Silicon Data CEO Carmen Li to talk about turnin
 2026-11-13 20:48:05,台股,鉅亨網,"4303,4714,9960",信立Q3受惠本業+業外挹注 獲利季增近3倍爆量成長,信立第3季稅後純益9487萬元，季增3.66倍，EPS 0.72元；前3季稅後純益7010萬元、EPS 0.53元。&#10;受鞋材、包材、運動用品需求帶動，高附加價值合成皮革、機能膜材出貨增，毛利率升至25％、營益率4％。&#10;看好第4季秋冬新品與節慶備貨延續需求。,https://news.cnyes.com/news/id/6662054
 2026-11-13 20:30:57,台股,鉅亨網,4714,永捷麻豆廠明年Q3起生產環保材料訂單 Q3獲利虧轉盈,"永捷第3季稅後純益1,557萬元、EPS 0.07元，較上季轉虧為盈，前三季每股稅後淨損-0.01元。&#10;第3季營收5.4億元、年增40%，毛利率升至26%；10月營收1.72億元、年增72.12%，前10月營收18.96億元、年增63.54%。&#10;擴建麻豆廠、布局水性PU與可撓式Hard Coat。",https://news.cnyes.com/news/id/6662004
 2026-11-13 17:41:00,台股,證交所重大訊息,3711,"日月光投控：代子公司日月光半導體製造(股)公司公告
-向萬潤科技股份有限公司取得供營業用之機器設備","1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
+向印能科技股份有限公司取得供營業用之機器設備","1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
 供營業用之機器設備
-2.事實發生日:115/9/21~115/11/13
+2.事實發生日:115/7/9~115/11/13
 3.董事會通過日期: 不適用
 4.其他核決日期:
 核決層級:總經理核決
 民國115年11月13日
 5.交易單位數量（如ＸＸ平方公尺，折合ＸＸ坪）、每單位價格及交易總金額:
 交易數量：一批
-每單位價格計：新台幣1,026,094仟元(未稅)
-累計交易總金額計：新台幣1,026,094仟元(未稅)
+每單位價格計：新台幣1,005,349仟元(未稅)
+累計交易總金額計：新台幣1,005,349仟元(未稅)
 6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之關
 係人者，得免揭露其姓名）:
-交易相對人：萬潤科技股份有限公司
+交易相對人：印能科技股份有限公司
 與公司之關係：無
 7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移轉之
 所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次移轉日期
@@ -1095,20 +1254,20 @@ Deirdre Bosa then sits down with Silicon Data CEO Carmen Li to talk about turnin
 31.其他敘明事項:
 無",https://mops.twse.com.tw/
 2026-11-13 17:41:00,台股,證交所重大訊息,3711,"日月光投控：代子公司日月光半導體製造(股)公司公告
-向印能科技股份有限公司取得供營業用之機器設備","1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
+向萬潤科技股份有限公司取得供營業用之機器設備","1.標的物之名稱及性質（如坐落台中市北區ＸＸ段ＸＸ小段土地）:
 供營業用之機器設備
-2.事實發生日:115/7/9~115/11/13
+2.事實發生日:115/9/21~115/11/13
 3.董事會通過日期: 不適用
 4.其他核決日期:
 核決層級:總經理核決
 民國115年11月13日
 5.交易單位數量（如ＸＸ平方公尺，折合ＸＸ坪）、每單位價格及交易總金額:
 交易數量：一批
-每單位價格計：新台幣1,005,349仟元(未稅)
-累計交易總金額計：新台幣1,005,349仟元(未稅)
+每單位價格計：新台幣1,026,094仟元(未稅)
+累計交易總金額計：新台幣1,026,094仟元(未稅)
 6.交易相對人及其與公司之關係（交易相對人如屬自然人，且非公司之關
 係人者，得免揭露其姓名）:
-交易相對人：印能科技股份有限公司
+交易相對人：萬潤科技股份有限公司
 與公司之關係：無
 7.交易相對人為關係人者，並應公告選定關係人為交易對象之原因及前次移轉之
 所有人、前次移轉之所有人與公司及交易相對人間相互之關係、前次移轉日期
